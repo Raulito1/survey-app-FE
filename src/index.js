@@ -4,13 +4,20 @@ import ReactDOM from 'react-dom';
 import { Auth0Provider } from '@auth0/auth0-react';
 import { Provider } from 'react-redux';
 import App from './App';
-import { store } from './store' // Make sure to import your Redux store
+import { store } from './store';
+
+const domain = process.env.REACT_APP_AUTH0_DOMAIN;
+const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
+const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
 
 ReactDOM.render(
   <Auth0Provider
-    domain="dev-x5lmxdamexy436rr.us.auth0.com"
-    clientId="hVD9rHaycEDDP9CyviGqPE5zklTAgsyX"
+    domain={domain}
+    clientId={clientId}
     redirectUri={window.location.origin}
+    audience={audience}
+    useRefreshTokens={true}
+    cacheLocation="localstorage"
   >
     <Provider store={store}>
       <App />

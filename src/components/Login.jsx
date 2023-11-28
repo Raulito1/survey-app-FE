@@ -1,4 +1,3 @@
-// src/components/LoginView.jsx
 import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Box, Button, Container, Heading, Text, VStack } from '@chakra-ui/react';

@@ -1,25 +1,78 @@
-import axios from 'axios';
+const BASE_URL = 'http://localhost:3000';
 
-const BASE_URL = 'http://localhost:8080/api/public/surveys';
-
-const storeResponse = (surveyId, responseDto) => {
-    return axios.post(`${BASE_URL}/${surveyId}/responses`, responseDto);
+const storeResponse = async (surveyId, userId, responseDto) => {
+    console.log('Storing response:', { surveyId, userId, responseDto });
+    try {
+        const response = await fetch(`${BASE_URL}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, surveyId, responses: responseDto })
+        });
+        const data = await response.json();
+        console.log('Response received:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in storeResponse:', error);
+        throw error; // Rethrowing the error for further handling if needed
+    }
 };
 
-const getResponses = (surveyId, userId) => {
-    return axios.get(`${BASE_URL}/${surveyId}/responses/${userId}`);
+const getResponses = async (surveyId, userId) => {
+    console.log('Fetching responses:', { surveyId, userId });
+    try {
+        const response = await fetch(`${BASE_URL}/answers?surveyId=${surveyId}&userId=${userId}`);
+        const data = await response.json();
+        console.log('Responses received:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in getResponses:', error);
+        throw error;
+    }
 };
 
-const createSurvey = (surveyCreateDTO) => {
-    return axios.post(`${BASE_URL}/create`, surveyCreateDTO);
+const createSurvey = async (surveyCreateDTO) => {
+    console.log('Creating survey:', surveyCreateDTO);
+    try {
+        const response = await fetch(`${BASE_URL}/surveys`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(surveyCreateDTO)
+        });
+        const data = await response.json();
+        console.log('Survey created:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in createSurvey:', error);
+        throw error;
+    }
 };
 
-const deleteSurvey = (surveyId) => {
-    return axios.delete(`${BASE_URL}/${surveyId}`);
+const deleteSurvey = async (surveyId) => {
+    console.log('Deleting survey:', surveyId);
+    try {
+        const response = await fetch(`${BASE_URL}/surveys/${surveyId}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        console.log('Survey deleted:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in deleteSurvey:', error);
+        throw error;
+    }
 };
 
-const getAllSurveys = () => {
-    return axios.get(`${BASE_URL}/`);
+const getAllSurveys = async () => {
+    console.log('Fetching all surveys');
+    try {
+        const response = await fetch(`${BASE_URL}/surveys`);
+        const data = await response.json();
+        console.log('All surveys:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in getAllSurveys:', error);
+        throw error;
+    }
 };
 
 export const surveyService = {
