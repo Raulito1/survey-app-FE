@@ -4,9 +4,9 @@ import { surveyService } from '../../services/surveyService';
 // Async thunk for storing survey responses
 export const storeResponse = createAsyncThunk(
     'survey/storeResponse',
-    async ({ surveyId, responseDto }, { rejectWithValue }) => {
+    async ({ userId, surveyId, responseDto }, { rejectWithValue }) => {
         try {
-            const response = await surveyService.storeResponse(surveyId, responseDto);
+            const response = await surveyService.storeResponse(userId, surveyId, responseDto);
             console.log('Response stored:', response);
             return response.data;
         } catch (error) {
@@ -18,17 +18,27 @@ export const storeResponse = createAsyncThunk(
 // Async thunk for fetching survey questions
 export const fetchSurveyQuestions = createAsyncThunk(
     'survey/fetchSurveyQuestions',
-    async (_, { rejectWithValue }) => {
+    async (_, { dispatch, getState, rejectWithValue }) => {
         try {
-            const response = await surveyService.getAllSurveys(); 
-            // Assuming the response contains an array of survey questions
-            console.log('Questions received:', response.data.questions);
-            return response.data.questions; 
+            const response = await surveyService.getAllSurveys();
+            const surveys = response; // Assuming this is the array of surveys
+
+            // Set default surveyId if it's not already set
+            const currentSurveyId = getState().survey.surveyId;
+            if (!currentSurveyId && surveys.length > 0) {
+                dispatch(setSurveyId(surveys[0].id));
+            }
+
+            // Extract questions and continue as before
+            const allQuestions = surveys.flatMap(survey => survey.questions);
+            return allQuestions;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            console.error('Error fetching surveys:', error);
+            return rejectWithValue(error.response?.data || 'An unknown error occurred');
         }
     }
 );
+
 
 export const surveySlice = createSlice({
     name: 'survey',
@@ -36,13 +46,24 @@ export const surveySlice = createSlice({
         questions: [],
         answers: {},
         loading: false,
-        error: null
+        error: null,
+        userId: null,
+        surveyId: null,
     },
     reducers: {
         setAnswers: (state, action) => {
             const { questionId, answer } = action.payload;
+            console.log('Setting answer:', { questionId, answer });
             state.answers[questionId] = answer;
         },
+        setUserId: (state, action) => {
+            console.log('Setting userId:', action.payload);
+            state.userId = action.payload;
+        },
+        setSurveyId: (state, action) => {
+            console.log('Setting surveyId:', action.payload);
+            state.surveyId = action.payload;
+        }
     },
     extraReducers: {
         // Handle fetchSurveyQuestions
@@ -70,5 +91,7 @@ export const surveySlice = createSlice({
 });
 
 export const { setAnswers } = surveySlice.actions;
+export const { setUserId } = surveySlice.actions;
+export const { setSurveyId } = surveySlice.actions;
 
 export default surveySlice.reducer;

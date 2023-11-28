@@ -1,20 +1,17 @@
-const BASE_URL = 'http://localhost:3000';
 
-const storeResponse = async (surveyId, userId, responseDto) => {
-    console.log('Storing response:', { surveyId, userId, responseDto });
-    try {
-        const response = await fetch(`${BASE_URL}/answers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, surveyId, responses: responseDto })
-        });
-        const data = await response.json();
-        console.log('Response received:', data);
-        return data;
-    } catch (error) {
-        console.error('Error in storeResponse:', error);
-        throw error; // Rethrowing the error for further handling if needed
-    }
+const BASE_URL = 'http://localhost:3001';
+
+const storeResponse = async (userId, surveyId, responseDto) => {
+    const response = await fetch(`${BASE_URL}/answers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            id: userId,
+            surveyId: surveyId, 
+            responses: responseDto
+        })    });
+    const data = await response.json();
+    return data;
 };
 
 const getResponses = async (surveyId, userId) => {

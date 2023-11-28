@@ -12,16 +12,16 @@ import {
     SliderThumb,
 } from '@chakra-ui/react';
 
-const QuestionTypeRenderer = ({ question, answerOptions, type, onChange }) => {
+const QuestionTypeRenderer = ({ questionId, options, type, handleAnswerChange }) => {
     switch (type) {
         case 'text':
-            return <Input placeholder="Type your answer here..." onChange={onChange} />;
+            return <Input placeholder="Type your answer here..." onChange={(e) => handleAnswerChange(questionId, e.target.value)} />;
         case 'boolean':
             return (
                 <RadioGroup>
                     <Stack direction="row">
-                        <Radio value="true" onChange={onChange}>Yes</Radio>
-                        <Radio value="false" onChange={onChange}>No</Radio>
+                        <Radio value="true" onChange={(e) => handleAnswerChange(questionId, e.target.value)}>Yes</Radio>
+                        <Radio value="false" onChange={(e) => handleAnswerChange(questionId, e.target.value)}>No</Radio>
                     </Stack>
                 </RadioGroup>
             );
@@ -29,8 +29,8 @@ const QuestionTypeRenderer = ({ question, answerOptions, type, onChange }) => {
             return (
                 <RadioGroup>
                     <Stack direction="column">
-                        {answerOptions.map((option, index) => (
-                            <Radio key={index} value={option} onChange={onChange}>
+                        {options.map((option, index) => (
+                            <Radio key={index} value={option} onChange={(e) => handleAnswerChange(questionId, e.target.value)}>
                                 {option}
                             </Radio>
                         ))}
@@ -41,8 +41,8 @@ const QuestionTypeRenderer = ({ question, answerOptions, type, onChange }) => {
             return (
                 <CheckboxGroup>
                     <Stack direction="column">
-                        {answerOptions.map((option, index) => (
-                            <Checkbox key={index} value={option} onChange={onChange}>
+                        {options.map((option, index) => (
+                            <Checkbox key={index} value={option} onChange={(e) => handleAnswerChange(questionId, e.target.checked)}>
                                 {option}
                             </Checkbox>
                         ))}
@@ -51,15 +51,25 @@ const QuestionTypeRenderer = ({ question, answerOptions, type, onChange }) => {
             );
         case 'slider':
             return (
-                <Slider defaultValue={30} min={0} max={100} step={1} onChange={onChange}>
+                <Slider defaultValue={30} min={0} max={100} step={1} onChange={(val) => handleAnswerChange(questionId, val)}>
                     <SliderTrack>
                         <SliderFilledTrack />
                     </SliderTrack>
                     <SliderThumb fontSize="sm" boxSize="32px" />
                 </Slider>
             );
-        // ... other question types
-
+            case 'multiple-choice':
+                return (
+                    <RadioGroup>
+                        <Stack direction="column">
+                            {options.map((option, index) => (
+                                <Radio key={index} value={option} onChange={(e) => handleAnswerChange(questionId, e.target.value)}>
+                                    {option}
+                                </Radio>
+                            ))}
+                        </Stack>
+                    </RadioGroup>
+                );
         default:
             return null;
     }

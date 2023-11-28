@@ -1,32 +1,21 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import SurveyQuestion from './SurveyQuestion';
-import { fetchSurveyQuestions } from '../store/slices/surveySlice'; // This action needs to be implemented in your surveySlice
+import React from 'react';
+import QuestionTypeRenderer from './QuestionTypeRenderer';
 
-const SurveyQuestionsContainer = () => {
-    const dispatch = useDispatch();
-    // Assume that the state has a survey object with a questions array
-    const questions = useSelector(state => state.survey.questions);
+// Imports for Chakra-UI components
+import { Box, Text } from '@chakra-ui/react';
 
-    useEffect(() => {
-        // Dispatch an action to fetch questions from the database
-        dispatch(fetchSurveyQuestions());
-    }, [dispatch]);
-
-    console.log("Questions1:", questions); // Debugging log
-
+const SurveyQuestion = ({ questionId, question, options, type, answer, handleAnswerChange }) => {
     return (
-        <div>
-            {questions.slice(0, 10).map((question, index) => (
-                <SurveyQuestion
-                    key={question.id}
-                    question={question.text}
-                    answerOptions={question.answerOptions}
-                    type={question.type}
-                />
-            ))}
-        </div>
+        <Box mb={4}> {/* Add margin-bottom for spacing */}
+            <Text fontSize="lg" mb={2}>{question}</Text> {/* Question text */}
+            <QuestionTypeRenderer 
+                type={type} 
+                questionId={questionId}
+                options={options} 
+                handleAnswerChange={handleAnswerChange}
+            />
+        </Box>
     );
 };
 
-export default SurveyQuestionsContainer;
+export default SurveyQuestion;

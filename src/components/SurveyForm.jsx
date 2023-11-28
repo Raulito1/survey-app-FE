@@ -1,46 +1,47 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import SurveyQuestion from './SurveyQuestion';
+
+import SurveyQuestionsList from './SurveyQuestionsList';
 
 import { setAnswers, storeResponse } from '../store/slices/surveySlice';
 import setError from '../store/slices/errorSlice';
 
+// Chakra UI Components
+import { Flex, Button, Text } from '@chakra-ui/react';
+
 const SurveyForm = () => {
     const dispatch = useDispatch();
     const survey = useSelector(state => state.survey);
-    const { questions, surveyId, answers } = survey;
-    
-    console.log("Survey:", survey); // Debugging log
-    
-    const handleAnswerChange = (questionId, event) => {
-        const { value, type, checked } = event.target;
+    const { questions, answers, loading, error } = survey;
+    const userId = useSelector(state => state.survey.userId); 
+    const surveyId = useSelector(state => state.survey.surveyId); // Retrieve surveyId from the state
 
-        if (type === "checkbox") {
-            const updatedOptions = checked
-                ? [...(answers[questionId]?.answerOptions || []), value]
-                : answers[questionId]?.answerOptions.filter(opt => opt !== value) || [];
 
-            dispatch(setAnswers({ questionId, answer: { answerOptions: updatedOptions } }));
-        } else {
-            dispatch(setAnswers({ questionId, answer: value }));
-        }
+    console.log('SurveyForm rendered', surveyId); // Debugging log
+
+        
+    const handleAnswerChange = (questionId, answerValue) => {
+        // Update the answers in the store
+        dispatch(setAnswers({ questionId, answer: answerValue }));
     };
+    
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
         // Format the answers properly for the API
+        console.log("Answers:", answers); // Debugging log
         const responseDto = {
-            responses: Object.entries(answers).map(([questionId, answerData]) => ({
+            responses: Object.entries(answers).map(([questionId, answer]) => ({
                 questionId: parseInt(questionId),
-                answer: answerData.answer || null,
-                answerOptions: answerData.answerOptions || null,
+                answer: answer || null
             }))
         };
+        
 
         try {
             // Submit the survey response
-            await dispatch(storeResponse({ surveyId, responseDto })).unwrap();
+            await dispatch(storeResponse({ userId, surveyId, responseDto })).unwrap();
             // Handle successful submission here, e.g., show a message or redirect
         } catch (error) {
             // Handle error
@@ -48,23 +49,23 @@ const SurveyForm = () => {
         }
     };
 
-    console.log("Questions:", questions); // Debugging log
-
-
     return (
-        <form onSubmit={handleSubmit}>
-            <h1>form!</h1>
-            {questions.map(question => (
-                <SurveyQuestion
-                    key={question.id}
-                    question={question.text}
-                    answerOptions={question.answerOptions}
-                    type={question.type}
-                    answer={answers[question.id]?.answer || ''}
-                    onAnswerChange={(event) => handleAnswerChange(question.id, event)}
-                />
-            ))}
-            <button type="submit">Submit</button>
+        <form onSubmit={handleSubmit} style={{ paddingTop: '20px' }}>
+            <Flex direction="column" align="center" justify="center">
+                <Text fontSize="2xl" mb={4}>Survey Title</Text> {/* Survey Title */}
+                {loading && <div>Loading...</div>}
+                {error && <div>Error: {error}</div>}
+                {!loading && !error && (
+                    <SurveyQuestionsList 
+                        key={questions.id}
+                        questionId={questions.id} 
+                        questions={questions} 
+                        answers={answers} 
+                        handleAnswerChange={handleAnswerChange} 
+                    />
+                )}
+                <Button colorScheme="blue" type="submit" mt={4}>Submit</Button> {/* Chakra UI Button */}
+            </Flex>
         </form>
     );
 };
