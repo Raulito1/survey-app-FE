@@ -4,11 +4,11 @@ import { surveyService } from '../../services/surveyService';
 // Async thunk for storing survey responses
 export const storeResponse = createAsyncThunk(
     'survey/storeResponse',
-    async ({ userId, surveyId, responseDto }, { rejectWithValue }) => {
+    async ({ response }, { rejectWithValue }) => {
         try {
-            const response = await surveyService.storeResponse(userId, surveyId, responseDto);
-            console.log('Response stored:', response);
-            return response.data;
+            const res = await surveyService.storeResponse(response);
+            console.log('Response stored:', res);
+            return res.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -39,30 +39,67 @@ export const fetchSurveyQuestions = createAsyncThunk(
     }
 );
 
+// Async thunk for fetching all the surveys
+export const fetchAllSurveys = createAsyncThunk(
+    'survey/fetchAllSurveys',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await surveyService.getAllSurveys();
+            // Assuming response is the array of surveys
+            return response; // Directly return the response as it should be the surveys array
+        }
+        catch (error) {
+            console.error('Error fetching surveys:', error);
+            return rejectWithValue(error.response?.data || 'An unknown error occurred');
+        }
+    }
+);
 
 export const surveySlice = createSlice({
     name: 'survey',
     initialState: {
         questions: [],
+        responses: [],
+        surveys: [],
         answers: {},
+        currentSurvey: null, // Holds the current active survey
+        submittedSurveys: {}, // Object to track if a survey has been submitted
+        submission: false,
         loading: false,
         error: null,
-        userId: null,
         surveyId: null,
     },
     reducers: {
         setAnswers: (state, action) => {
             const { questionId, answer } = action.payload;
-            console.log('Setting answer:', { questionId, answer });
-            state.answers[questionId] = answer;
-        },
-        setUserId: (state, action) => {
-            console.log('Setting userId:', action.payload);
-            state.userId = action.payload;
+            // Check if the answer is an array (for multi-select)
+            if (Array.isArray(answer)) {
+                // Ensure that the answer for the questionId is an array
+                if (!Array.isArray(state.answers[questionId])) {
+                    state.answers[questionId] = [];
+                }
+
+                // Update the array with the new set of selected values
+                state.answers[questionId] = answer;
+            } else {
+                // For other question types, store the single answer
+                state.answers[questionId] = answer;
+            }
         },
         setSurveyId: (state, action) => {
-            console.log('Setting surveyId:', action.payload);
             state.surveyId = action.payload;
+        },
+        setSurvey: (state, action) => {
+            state.survey = action.payload;
+        },
+        markSurveyAsSubmitted: (state, action) => {
+            const surveyId = action.payload;
+            console.log('Marking survey as submitted:', action.payload);
+            const survey = state.surveys.find(s => s.id === surveyId);
+            console.log('Marking survey as submitted:', surveyId);
+            if (survey) {
+                survey.submitted = true; // Add the 'submitted' property
+            }
         }
     },
     extraReducers: {
@@ -79,19 +116,26 @@ export const surveySlice = createSlice({
             state.error = action.payload || 'Could not fetch questions';
         },
         // Handle storeResponse
-        [storeResponse.fulfilled]: (state) => {
-            // You could clear the answers here if you want to reset the form, or handle success in other ways
-            state.answers = {};
+        [storeResponse.fulfilled]: (state, action) => {
+            state.responses = action.payload;
+            state.surveySubmissions[state.surveyId] = true;
         },
         [storeResponse.rejected]: (state, action) => {
-            // Handle error, possibly by setting an error state variable
             state.error = action.payload || 'Could not store response';
         },
+        [fetchAllSurveys.fulfilled]: (state, action) => {
+            state.surveys = action.payload;
+            const surveyId = action.meta.arg.surveyId; // Get the surveyId from the action metadata
+            const survey = state.surveys.find(s => s.id === surveyId);
+            if (survey) {
+                survey.submitted = true; // Mark the survey as submitted
+            }        },
+        [fetchAllSurveys.rejected]: (state, action) => {
+            state.error = action.payload || 'Could not fetch surveys';
+        }
     },
 });
 
-export const { setAnswers } = surveySlice.actions;
-export const { setUserId } = surveySlice.actions;
-export const { setSurveyId } = surveySlice.actions;
+export const { setAnswers, setSurveyId, setSurvey, markSurveyAsSubmitted } = surveySlice.actions;
 
 export default surveySlice.reducer;

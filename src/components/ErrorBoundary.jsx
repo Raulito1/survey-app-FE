@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import setError from '../store/slices/errorSlice';
+import { logError } from '../store/slices/errorSlice'; // Import logError action
 
 // Chakra UI Components
 import { Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
@@ -17,18 +17,18 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // You can also log the error to an error reporting service
-    this.props.setError(`${error}: ${errorInfo.componentStack}`);
+    // Log the error using the logError action from errorSlice
+    this.props.logError(`${error}: ${errorInfo.componentStack}`);
   }
 
   render() {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
+      // Render custom fallback UI
       return (
         <Alert status="error">
           <AlertIcon />
           <AlertTitle mr={2}>Error!</AlertTitle>
-          <AlertDescription>{this.props.errorMessage || 'Something went wrong.'}</AlertDescription>
+          <AlertDescription>{this.props.error || 'Something went wrong.'}</AlertDescription>
         </Alert>
       );
     }
@@ -38,11 +38,11 @@ class ErrorBoundary extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  errorMessage: state.error.message,
+  error: state.error.error, // Adjust according to the state structure in errorSlice
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  setError: (message) => dispatch(setError(message)),
-});
+const mapDispatchToProps = {
+  logError, // Use object shorthand for mapDispatchToProps
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ErrorBoundary);

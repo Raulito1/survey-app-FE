@@ -1,4 +1,3 @@
-// src/store/slices/errorSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 export const errorSlice = createSlice({
@@ -8,7 +7,6 @@ export const errorSlice = createSlice({
     },
     reducers: {
         logError: (state, action) => {
-        // You could further enhance this to push the error into an array if you want to keep a history of errors
             state.error = action.payload;
         },
         clearError: state => {

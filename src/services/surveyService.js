@@ -1,16 +1,17 @@
 
 const BASE_URL = 'http://localhost:3001';
 
-const storeResponse = async (userId, surveyId, responseDto) => {
-    const response = await fetch(`${BASE_URL}/answers`, {
+const storeResponse = async (response) => {
+    const res = await fetch(`${BASE_URL}/answers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            id: userId,
-            surveyId: surveyId, 
-            responses: responseDto
+            id: response.userId,
+            surveyId: response.surveyId, 
+            responses: response
         })    });
-    const data = await response.json();
+
+    const data = await res.json();
     return data;
 };
 
@@ -72,9 +73,23 @@ const getAllSurveys = async () => {
     }
 };
 
+const getSurveyById = async (surveyId) => {
+    console.log('Fetching survey by ID:', surveyId);
+    try {
+        const response = await fetch(`${BASE_URL}/surveys/${surveyId}`);
+        const data = await response.json();
+        console.log('Survey data:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in getSurveyById:', error);
+        throw error;
+    }
+};
+
 export const surveyService = {
     storeResponse,
     getResponses,
+    getSurveyById,
     createSurvey,
     deleteSurvey,
     getAllSurveys,

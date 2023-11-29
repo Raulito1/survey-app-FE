@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import SurveyQuestion from './SurveyQuestion';
 
-const SurveyQuestionsList = ({ handleAnswerChange }) => {
+const SurveyQuestionsList = () => {
     const questions = useSelector(state => state.survey.questions);
     return (
         <div>
@@ -13,7 +13,6 @@ const SurveyQuestionsList = ({ handleAnswerChange }) => {
                     questionId={question.id}
                     options={question.options}
                     type={question.type}
-                    handleAnswerChange={handleAnswerChange}
                 />
             ))}
         </div>
