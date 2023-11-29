@@ -41,8 +41,6 @@ const SurveyDetail = () => {
 
     return (
         <div>
-            <h1>{survey.title}</h1>
-            <p>{survey.description}</p>
             <SurveyForm />
         </div>
     );

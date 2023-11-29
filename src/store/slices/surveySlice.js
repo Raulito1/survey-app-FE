@@ -4,15 +4,26 @@ import { surveyService } from '../../services/surveyService';
 // Async thunk for storing survey responses
 export const storeResponse = createAsyncThunk(
     'survey/storeResponse',
-    async ({ response }, { rejectWithValue }) => {
-        try {
-            const res = await surveyService.storeResponse(response);
-            console.log('Response stored:', res);
-            return res.data;
-        } catch (error) {
-            return rejectWithValue(error.response.data);
+    async ({ userId, surveyId, response }, { rejectWithValue }) => {
+    try {
+        const res = await fetch('http://localhost:3001/answers', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, surveyId, responses: response.responses }),
+        });
+
+        if (!res.ok) {
+            throw new Error('Network response was not ok');
         }
+
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        return rejectWithValue(error.message);
     }
+}
 );
 
 // Async thunk for fetching survey questions
@@ -45,8 +56,7 @@ export const fetchAllSurveys = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await surveyService.getAllSurveys();
-            // Assuming response is the array of surveys
-            return response; // Directly return the response as it should be the surveys array
+            return response; 
         }
         catch (error) {
             console.error('Error fetching surveys:', error);
@@ -62,8 +72,9 @@ export const surveySlice = createSlice({
         responses: [],
         surveys: [],
         answers: {},
-        currentSurvey: null, // Holds the current active survey
-        submittedSurveys: {}, // Object to track if a survey has been submitted
+        currentSurvey: null, 
+        submittedSurveys: {}, 
+        submissionSuccess: false,
         submission: false,
         loading: false,
         error: null,
@@ -91,15 +102,14 @@ export const surveySlice = createSlice({
         },
         setSurvey: (state, action) => {
             state.survey = action.payload;
+            state.surveyId = action.payload.id;
         },
         markSurveyAsSubmitted: (state, action) => {
             const surveyId = action.payload;
-            console.log('Marking survey as submitted:', action.payload);
-            const survey = state.surveys.find(s => s.id === surveyId);
             console.log('Marking survey as submitted:', surveyId);
-            if (survey) {
-                survey.submitted = true; // Add the 'submitted' property
-            }
+            state.surveys = state.surveys.map(survey => 
+                survey.id === surveyId ? { ...survey, submitted: true } : survey
+            );
         }
     },
     extraReducers: {
@@ -117,19 +127,38 @@ export const surveySlice = createSlice({
         },
         // Handle storeResponse
         [storeResponse.fulfilled]: (state, action) => {
-            state.responses = action.payload;
-            state.surveySubmissions[state.surveyId] = true;
+            const surveyId = action.payload?.surveyId;
+            
+            if (surveyId) {
+                state.responses = [...state.responses, action.payload];
+                state.submittedSurveys[surveyId] = true; // Set the survey as submitted
+                state.submissionSuccess = true;
+            } else {
+                console.error('No surveyId provided in response');
+            }
         },
         [storeResponse.rejected]: (state, action) => {
             state.error = action.payload || 'Could not store response';
         },
         [fetchAllSurveys.fulfilled]: (state, action) => {
+            console.log('Surveys fetched:', action);
             state.surveys = action.payload;
-            const surveyId = action.meta.arg.surveyId; // Get the surveyId from the action metadata
-            const survey = state.surveys.find(s => s.id === surveyId);
-            if (survey) {
-                survey.submitted = true; // Mark the survey as submitted
-            }        },
+            if (!state.surveyId && state.surveys.length > 0) {
+                state.surveyId = state.surveys[0].id; // Only set this if surveyId isn't already set
+            }
+            state.surveys.forEach((survey) => {
+                // get each survey id and set it the surveyId state
+                state.surveyId = survey.id;
+               // Check if the survey has a 'submitted' property and if it's true
+                if (survey.hasOwnProperty('submitted') && survey.submitted === true) {
+                    console.log(`Survey with ID ${survey.id} has been submitted.`);
+                    // Here you can do additional processing if needed
+                } else {
+                    console.log(`Survey with ID ${survey.id} has not been submitted.`);
+                    // Any other processing for surveys that have not been submitted
+                }
+            });  
+        },
         [fetchAllSurveys.rejected]: (state, action) => {
             state.error = action.payload || 'Could not fetch surveys';
         }

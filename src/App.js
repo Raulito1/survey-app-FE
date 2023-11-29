@@ -43,9 +43,9 @@ const App = () => {
       <Navbar />
       <Router>
         <Routes>
-          <Route path="/" element={!isAuthenticated ? <Login /> : <Navigate to="/survey-form" />} />
-          <Route path="/survey-list" element={<SurveyList />} />
+          <Route path="/" element={!isAuthenticated ? <Login /> : <Navigate to="/survey-list" />} />
           <Route path="/surveys/:surveyId" element={<SurveyDetail />} />
+          <Route path="/survey-list" element={<ProtectedRoute component={SurveyList} />} />
           <Route path="/survey-form" element={<ProtectedRoute component={SurveyForm} />} />
           <Route path="/manage-questions" element={<ProtectedRoute component={ManageQuestions} />} />
           <Route path="/logout" element={<Logout />} />

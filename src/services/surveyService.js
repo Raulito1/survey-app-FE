@@ -1,15 +1,16 @@
 
 const BASE_URL = 'http://localhost:3001';
 
-const storeResponse = async (response) => {
+const storeResponse = async (userId, surveyId, response) => {
     const res = await fetch(`${BASE_URL}/answers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            id: response.userId,
-            surveyId: response.surveyId, 
+            id: userId,
+            surveyId: surveyId,
             responses: response
-        })    });
+        })    
+    });
 
     const data = await res.json();
     return data;
@@ -61,9 +62,13 @@ const deleteSurvey = async (surveyId) => {
 };
 
 const getAllSurveys = async () => {
-    console.log('Fetching all surveys');
     try {
         const response = await fetch(`${BASE_URL}/surveys`);
+        if (!response.ok) {
+            // Handle non-OK responses here
+            console.error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         console.log('All surveys:', data);
         return data;
@@ -72,6 +77,7 @@ const getAllSurveys = async () => {
         throw error;
     }
 };
+
 
 const getSurveyById = async (surveyId) => {
     console.log('Fetching survey by ID:', surveyId);
