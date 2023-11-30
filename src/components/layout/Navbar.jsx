@@ -53,8 +53,11 @@ const Navbar = ({ user }) => {
                     )}
                     {isAdmin && (
                         <>
-                            <MenuItem as={Link} to="/survey-create" _hover={{ bg: "blue.500", color: "white" }}>
+                            <MenuItem as={Link} to="/create-survey" _hover={{ bg: "blue.500", color: "white" }}>
                                 Create a Survey
+                            </MenuItem>
+                            <MenuItem as={Link} to="/edit-survey" _hover={{ bg: "blue.500", color: "white" }}>
+                                Edit a Survey
                             </MenuItem>
                             <MenuItem as={Link} to="/delete-survey" _hover={{ bg: "blue.500", color: "white" }}>
                                 Delete a Survey

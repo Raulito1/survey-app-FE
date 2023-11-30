@@ -4,13 +4,13 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 // Redux Actions
-import { fetchAllSurveys, resetSubmittedSurveys } from '../store/slices/surveySlice';
+import { fetchAllSurveys, deleteSurvey, setEditingSurveyId } from '../store/slices/surveySlice';
 
 // Chakra UI Components
 import { Box, Text, Stack, Button } from '@chakra-ui/react';
 
 // React Router
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 // Components
 import CenteredSpinner from './layout/CenteredSpinner';
@@ -19,6 +19,8 @@ import Title from './layout/Title';
 
 const SurveyList = () => {
     const dispatch = useDispatch();
+    const location = useLocation();
+    const navigate = useNavigate();
     const surveys = useSelector(state => state.survey.surveys);
     const submittedSurveys = useSelector(state => state.survey.submittedSurveys);
     const loading = useSelector(state => state.survey.loading);
@@ -27,6 +29,14 @@ const SurveyList = () => {
 
     const userRoles = useSelector(state => state.auth.roles);
     const isAdmin = userRoles.includes('ADMIN');
+
+    console.log('isAdmin', isAdmin)
+
+    const isDeleteSurveyPage = location.pathname === '/delete-survey';
+    const isEditSurveyPage = location.pathname === '/edit-survey';
+    const isRefreshSurveyPage = location.pathname === '/refresh-survey';
+
+    console.log('isDeleteSurveyPage', isDeleteSurveyPage)
 
     useEffect(() => {
         if (!surveysLoaded) {
@@ -40,6 +50,19 @@ const SurveyList = () => {
 
     if (error) {
         return <Text>{error}</Text>;
+    }
+
+    const handleDelete = async (surveyId) => {
+        await dispatch(deleteSurvey(surveyId));
+    };
+
+    const handleEdit = (surveyId) => {
+        dispatch(setEditingSurveyId(surveyId));
+        navigate(`/edit-survey/${surveyId}`);
+    };
+
+    const handleRefresh = (surveyId) => {
+        // TODO: Implement the logic to refresh a survey
     }
 
     return (
@@ -61,23 +84,46 @@ const SurveyList = () => {
                                     borderWidth="1px">
                                     <Title title={survey.title} />
                                     <Text>{survey.description}</Text>
-                                    {isSubmitted ? (
-                                    <>
-                                        <Text mt={3}>Survey Submitted. Thank you!</Text>
-                                        {isAdmin && (
+                                    {isAdmin && isDeleteSurveyPage && (
                                         <Button 
                                             mt={3}
                                             colorScheme="red"
-                                            onClick={() => dispatch(resetSubmittedSurveys(survey.id))}
+                                            onClick={() => handleDelete(survey.id)}
                                         >
-                                            Reset Survey
+                                            Delete Survey
                                         </Button>
+                                    )}
+
+                                    {isAdmin && isEditSurveyPage && (
+                                        <Button 
+                                            mt={3}
+                                            colorScheme="blue"
+                                            onClick={() => handleEdit(survey.id)}
+                                        >
+                                            Edit Survey
+                                        </Button>
+                                    )}
+
+                                    {isAdmin && isRefreshSurveyPage && (
+                                        <Button 
+                                            mt={3}
+                                            colorScheme="blue"
+                                            onClick={() => handleRefresh(survey.id)}
+                                        >
+                                            Refresh Survey
+                                        </Button>
+                                    )}
+
+                                    {!isDeleteSurveyPage && !isEditSurveyPage && !isRefreshSurveyPage && (
+                                        <>
+                                        {isSubmitted ? (
+                                            <Text mt={3}>Survey Submitted. Thank you!</Text>
+                                        ) : (
+                                            <Link to={`/surveys/${survey.id}`}>
+                                                <Button mt={3}>Take Survey</Button>
+                                            </Link>
                                         )}
                                     </>
-                                    ) : (
-                                    <Link to={`/surveys/${survey.id}`}>
-                                        <Button mt={3}>Take Survey</Button>
-                                    </Link>
                                     )}
                                 </Box>
                             );

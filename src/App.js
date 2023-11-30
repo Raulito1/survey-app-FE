@@ -19,10 +19,12 @@ import CreateSurvey from './components/CreateSurvey';
 import ProtectedRoute from './components/ProtectedRoute';
 import SurveyList from './components/SurveyList';
 import SurveyDetail from './components/SurveyDetail';
+import DeleteSurvey from './components/DeleteSurvey';
 
 // reduce slices
 import { fetchAllSurveys } from './store/slices/surveySlice';
 import { login, setUserRoles } from './store/slices/authSlice';
+import EditSurvey from './components/EditSurvey';
 
 const App = () => {
   const { isAuthenticated, user } = useAuth0();
@@ -46,8 +48,12 @@ const App = () => {
         <Routes>
           <Route path="/" element={!isAuthenticated ? <Login /> : <Navigate to="/survey-list" />} />
           <Route path="/surveys/:surveyId" element={<SurveyDetail />} />
-          <Route path="/survey-list" element={<ProtectedRoute component={SurveyList} />} />
-          <Route path="/survey-create" element={<ProtectedRoute component={CreateSurvey} />} />
+          <Route path="/survey-list" element={<SurveyList />} />
+          <Route path="/create-survey" element={<ProtectedRoute component={CreateSurvey} />} />
+          <Route path="/edit-survey" element={<ProtectedRoute component={SurveyList} />} />
+          <Route path="/edit-survey/:surveyId" element={<ProtectedRoute component={EditSurvey}/>} />
+          <Route path="/delete-survey" element={<ProtectedRoute component={DeleteSurvey} />} />
+          <Route path="/refresh-survey" element={<ProtectedRoute component={SurveyList} />} />
           {/* add other routes */}
         </Routes>
       </Router>

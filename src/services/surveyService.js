@@ -88,7 +88,7 @@ const getAllSurveys = async () => {
 };
 
 
-const getSurveyById = async (surveyId) => {
+const fetchSurveyById = async (surveyId) => {
     console.log('Fetching survey by ID:', surveyId);
     try {
         const response = await fetch(`${BASE_URL}/surveys/${surveyId}`);
@@ -104,7 +104,7 @@ const getSurveyById = async (surveyId) => {
 export const surveyService = {
     storeResponse,
     getResponses,
-    getSurveyById,
+    fetchSurveyById,
     createSurvey,
     deleteSurvey,
     getAllSurveys,

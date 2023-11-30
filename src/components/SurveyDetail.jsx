@@ -28,7 +28,7 @@ const SurveyDetail = () => {
 
         const fetchSurvey = async () => {
             try {
-                const data = await surveyService.getSurveyById(surveyId);
+                const data = await surveyService.fetchSurveyById(surveyId);
                 dispatch(setSurvey(data));
             } catch (error) {
                 console.error('Error fetching survey:', error);

@@ -65,6 +65,33 @@ export const createSurvey = createAsyncThunk(
     }
 );
 
+// Async thunk for deleting a survey
+export const deleteSurvey = createAsyncThunk(
+    'survey/deleteSurvey',
+    async (surveyId, { rejectWithValue }) => {
+        try {
+            await surveyService.deleteSurvey(surveyId);
+            return surveyId;  // Returning the deleted survey's ID
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+// Async thunk for fetching a survey by ID
+export const fetchSurveyById = createAsyncThunk(
+    'survey/fetchSurveyById',
+    async (surveyId, { rejectWithValue }) => {
+        try {
+            const response = await surveyService.fetchSurveyById(surveyId);
+            return response;
+        } catch (error) {
+            console.error('Error fetching survey by ID:', error);
+            return rejectWithValue(error.response?.data || 'An unknown error occurred');
+        }
+    }
+);
+
 export const surveySlice = createSlice({
     name: 'survey',
     initialState: {
@@ -79,6 +106,7 @@ export const surveySlice = createSlice({
         loading: false,
         error: null,
         surveyId: null,
+        editingSurveyId: null,
     },
     reducers: {
         setAnswers: (state, action) => {
@@ -118,7 +146,10 @@ export const surveySlice = createSlice({
             if (state.submittedSurveys[surveyId]) {
                 delete state.submittedSurveys[surveyId];
             }
-        }
+        },
+        setEditingSurveyId: (state, action) => {
+            state.editingSurveyId = action.payload;
+        },
     },
     extraReducers: (builders) => {
         builders
@@ -185,9 +216,29 @@ export const surveySlice = createSlice({
                 state.error = action.payload || 'Could not create survey';
                 state.loading = false;
             })
+            .addCase(deleteSurvey.fulfilled, (state, action) => {
+                state.surveys = state.surveys.filter(survey => survey.id !== action.payload);
+                state.loading = false;
+            })
+            .addCase(deleteSurvey.rejected, (state, action) => {
+                state.error = action.payload || 'Could not delete survey';
+                state.loading = false;
+            })
+            .addCase(fetchSurveyById.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchSurveyById.fulfilled, (state, action) => {
+                state.currentSurvey = action.payload;
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(fetchSurveyById.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || 'Failed to fetch survey';
+            });
     },
 });
 
-export const { setAnswers, setSurveyId, setSurvey, markSurveyAsSubmitted, resetSubmissionState, resetSubmittedSurveys } = surveySlice.actions;
+export const { setAnswers, setSurveyId, setSurvey, markSurveyAsSubmitted, resetSubmissionState, resetSubmittedSurveys, setEditingSurveyId } = surveySlice.actions;
 
 export default surveySlice.reducer;
