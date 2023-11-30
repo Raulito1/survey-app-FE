@@ -6,9 +6,10 @@ import { useParams } from 'react-router-dom';
 // Services
 import { surveyService } from '../services/surveyService';
 
-// Components
+// Custom Components
 import CenteredSpinner from './layout/CenteredSpinner';
 import SurveyForm from './SurveyForm';
+import SurveyTitle from './layout/SurveyTitle';
 
 // Redux Hooks
 import { useSelector, useDispatch } from 'react-redux';
@@ -41,10 +42,9 @@ const SurveyDetail = () => {
         return <div><CenteredSpinner /></div>;
     }
 
-    console.log('Survey:', survey);
-
     return (
         <div>
+            <SurveyTitle title={survey.title} />
             <SurveyForm questions={surveyQuestions}/>
         </div>
     );

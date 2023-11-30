@@ -1,5 +1,10 @@
-// Navbar.js
 import React from 'react';
+
+// React Router
+import { useLocation, Link } from 'react-router-dom';
+
+// Auth0 hook
+import { useAuth0 } from '@auth0/auth0-react';
 
 // Chakra UI Components
 import {
@@ -14,11 +19,10 @@ import {
     Avatar,
 } from '@chakra-ui/react';
 
-// Auth0 hook
-import { useAuth0 } from '@auth0/auth0-react';
-
 const Navbar = ({ user }) => {
     const { logout } = useAuth0();
+    const location = useLocation();
+    const isHome = location.pathname === '/survey-list'; 
 
     const handleLogout = () => {
         logout({ returnTo: window.location.origin });
@@ -36,7 +40,11 @@ const Navbar = ({ user }) => {
             <Menu>
                 <MenuButton as={Avatar} size="sm" name={user.name || user.nickname} src={user.picture} cursor="pointer" />
                 <MenuList bg="white" color="black">
-                    {/* ... other menu items ... */}
+                    {!isHome && (
+                        <MenuItem as={Link} to="/survey-list" _hover={{ bg: "blue.500", color: "white" }}>
+                            Go to Home
+                        </MenuItem>
+                    )}
                     <MenuItem _hover={{ bg: "blue.500", color: "white" }} onClick={handleLogout}>
                         Logout
                     </MenuItem>

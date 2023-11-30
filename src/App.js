@@ -30,8 +30,7 @@ const App = () => {
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
   const surveysLoaded = useSelector(state => state.survey.surveysLoaded);
-  const userRoles = useSelector((state) => state.auth.roles); // Retrieve roles from Redux store
-
+  const userRoles = useSelector((state) => state.auth.roles);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -48,8 +47,8 @@ useEffect(() => {
 
   return (
     <ChakraProvider>
-      <Navbar user={user} />
       <Router>
+        <Navbar user={user} />
         <Routes>
           <Route path="/" element={!isAuthenticated ? <Login /> : <Navigate to="/survey-list" />} />
           <Route path="/surveys/:surveyId" element={<SurveyDetail />} />
