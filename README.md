@@ -14,11 +14,12 @@ Survey App is a full-stack application designed to conduct surveys with a variet
 ## Technologies Used
 
 - **Auth0**: Manages authentication and role-based access control.
-- **JSON Server**: Simulates a backend database on port 3001, providing a mock REST API.
+- **JSON Server**: Simulates a backend database on `port 3001`, providing a mock REST API.
 - **Redux Toolkit (RTK)**: Manages application state and logic.
 - **Chakra UI**: Provides a modern, responsive user interface.
 - **Redux Persist**: Ensures state persistence across sessions.
-
+- **React Router**: Routing library used to manage routes.
+  
 ## Security Measures
 
 - Input validation to prevent malicious data entry.
