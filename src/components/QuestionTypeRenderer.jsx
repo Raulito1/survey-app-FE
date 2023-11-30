@@ -18,6 +18,8 @@ import { setAnswers } from '../store/slices/surveySlice';
 
 const QuestionTypeRenderer = ({ questionId, options, type }) => {
     const dispatch = useDispatch();
+
+    // TODO: Add state for selected options and slider value RTK
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [sliderValue, setSliderValue] = useState(5);
     const [showTooltip, setShowTooltip] = useState(false);

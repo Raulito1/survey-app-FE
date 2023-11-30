@@ -31,6 +31,9 @@ export const authSlice = createSlice({
             state.userId = null;
             state.roles = [];
         },
+        setUserRoles: (state, action) => {
+            state.roles = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -40,9 +43,12 @@ export const authSlice = createSlice({
             .addCase(getUserRoles.rejected, (state, action) => {
                 state.error = action.payload;
             })
+            .addCase(getUserRoles.pending, (state, action) => {
+                state.error = null;
+            })
     },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout, setUserRoles } = authSlice.actions;
 
 export default authSlice.reducer;

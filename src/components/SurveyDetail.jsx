@@ -9,7 +9,7 @@ import { surveyService } from '../services/surveyService';
 // Custom Components
 import CenteredSpinner from './layout/CenteredSpinner';
 import SurveyForm from './SurveyForm';
-import SurveyTitle from './layout/SurveyTitle';
+import Title from './layout/Title';
 
 // Redux Hooks
 import { useSelector, useDispatch } from 'react-redux';
@@ -44,7 +44,7 @@ const SurveyDetail = () => {
 
     return (
         <div>
-            <SurveyTitle title={survey.title} />
+            <Title title={survey.title} />
             <SurveyForm questions={surveyQuestions}/>
         </div>
     );

@@ -6,6 +6,9 @@ import { useLocation, Link } from 'react-router-dom';
 // Auth0 hook
 import { useAuth0 } from '@auth0/auth0-react';
 
+// reduc slice
+import { useSelector } from 'react-redux';
+
 // Chakra UI Components
 import {
     Box,
@@ -23,6 +26,9 @@ const Navbar = ({ user }) => {
     const { logout } = useAuth0();
     const location = useLocation();
     const isHome = location.pathname === '/survey-list'; 
+    const userRoles = useSelector(state => state.auth.roles);
+    const isAdmin = userRoles.includes('ADMIN');
+
 
     const handleLogout = () => {
         logout({ returnTo: window.location.origin });
@@ -44,6 +50,20 @@ const Navbar = ({ user }) => {
                         <MenuItem as={Link} to="/survey-list" _hover={{ bg: "blue.500", color: "white" }}>
                             Go to Home
                         </MenuItem>
+                    )}
+                    {isAdmin && (
+                        <>
+                            <MenuItem as={Link} to="/survey-create" _hover={{ bg: "blue.500", color: "white" }}>
+                                Create a Survey
+                            </MenuItem>
+                            <MenuItem as={Link} to="/delete-survey" _hover={{ bg: "blue.500", color: "white" }}>
+                                Delete a Survey
+                            </MenuItem>
+                            <MenuItem as={Link} to="/refresh-survey" _hover={{ bg: "blue.500", color: "white" }}>
+                                Refresh a Survey
+                            </MenuItem>
+                        </>
+                        
                     )}
                     <MenuItem _hover={{ bg: "blue.500", color: "white" }} onClick={handleLogout}>
                         Logout

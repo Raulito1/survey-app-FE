@@ -1,19 +1,28 @@
 
 const BASE_URL = 'http://localhost:3001';
 
-const storeResponse = async (userId, surveyId, response) => {
-    const res = await fetch(`${BASE_URL}/answers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            id: userId,
-            surveyId: surveyId,
-            responses: response
-        })    
-    });
+export const storeResponse = async (userId, surveyId, response) => {
+    try {
+        const res = await fetch(`${BASE_URL}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                id: userId,
+                surveyId: surveyId,
+                responses: response
+            })    
+        });
 
-    const data = await res.json();
-    return data;
+        if (!res.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        console.error('Error in storeResponse:', error);
+        throw error;
+    }
 };
 
 const getResponses = async (surveyId, userId) => {

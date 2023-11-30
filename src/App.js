@@ -15,35 +15,29 @@ import { ChakraProvider } from '@chakra-ui/react';
 // custom components
 import Navbar from './components/layout/Navbar';
 import Login from './components/Login';
-import SurveyForm from './components/SurveyForm';
-import ManageQuestions from './components/ManageQuestions';
-import Logout from './components/Logout';
+import CreateSurvey from './components/CreateSurvey';
 import ProtectedRoute from './components/ProtectedRoute';
 import SurveyList from './components/SurveyList';
 import SurveyDetail from './components/SurveyDetail';
 
 // reduce slices
 import { fetchAllSurveys } from './store/slices/surveySlice';
-import { login, getUserRoles } from './store/slices/authSlice';
+import { login, setUserRoles } from './store/slices/authSlice';
 
 const App = () => {
-  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, user } = useAuth0();
   const dispatch = useDispatch();
   const surveysLoaded = useSelector(state => state.survey.surveysLoaded);
-  const userRoles = useSelector((state) => state.auth.roles);
 
   useEffect(() => {
     if (isAuthenticated && user) {
+      const roles = user['http://my-survey-app.com/roles'];
+
       dispatch(fetchAllSurveys());
       dispatch(login(user.sub));
-      dispatch(getUserRoles(getAccessTokenSilently))
+      dispatch(setUserRoles(roles))
     }
-  }, [isAuthenticated, user, surveysLoaded, getAccessTokenSilently, dispatch]);
-
-// Log the roles to the console
-useEffect(() => {
-  console.log('User roles:', userRoles);
-}, [userRoles]);
+  }, [isAuthenticated, user, surveysLoaded, dispatch]);
 
   return (
     <ChakraProvider>
@@ -53,10 +47,8 @@ useEffect(() => {
           <Route path="/" element={!isAuthenticated ? <Login /> : <Navigate to="/survey-list" />} />
           <Route path="/surveys/:surveyId" element={<SurveyDetail />} />
           <Route path="/survey-list" element={<ProtectedRoute component={SurveyList} />} />
-          <Route path="/survey-form" element={<ProtectedRoute component={SurveyForm} />} />
-          <Route path="/manage-questions" element={<ProtectedRoute component={ManageQuestions} />} />
-          <Route path="/logout" element={<Logout />} />
-          {/* other routes */}
+          <Route path="/survey-create" element={<ProtectedRoute component={CreateSurvey} />} />
+          {/* add other routes */}
         </Routes>
       </Router>
     </ChakraProvider>
