@@ -65,6 +65,10 @@ export const fetchAllSurveys = createAsyncThunk(
     }
 );
 
+export const selectAreAllSurveysSubmitted = (state) => {
+    return state.survey.surveys.every((survey) => state.survey.submittedSurveys[survey.id]);
+};
+
 export const surveySlice = createSlice({
     name: 'survey',
     initialState: {
@@ -101,70 +105,81 @@ export const surveySlice = createSlice({
             state.surveyId = action.payload;
         },
         setSurvey: (state, action) => {
+            console.log('Setting survey:', action.payload);
             state.survey = action.payload;
             state.surveyId = action.payload.id;
+            state.questions = action.payload.questions;
         },
         markSurveyAsSubmitted: (state, action) => {
             const surveyId = action.payload;
             console.log('Marking survey as submitted:', surveyId);
-            state.surveys = state.surveys.map(survey => 
-                survey.id === surveyId ? { ...survey, submitted: true } : survey
-            );
+            state.submittedSurveys[surveyId] = true; // Properly update the submittedSurveys object
+        },
+        resetSubmissionState: (state) => {
+            state.submissionSuccess = false;
+            // Reset any other related state properties as needed
+        },
+        resetSubmittedSurveys: (state) => {
+            state.submittedSurveys = {};
         }
     },
-    extraReducers: {
-        // Handle fetchSurveyQuestions
-        [fetchSurveyQuestions.pending]: (state) => {
-            state.loading = true;
-        },
-        [fetchSurveyQuestions.fulfilled]: (state, action) => {
-            state.questions = action.payload;
-            state.loading = false;
-        },
-        [fetchSurveyQuestions.rejected]: (state, action) => {
-            state.loading = false;
-            state.error = action.payload || 'Could not fetch questions';
-        },
-        // Handle storeResponse
-        [storeResponse.fulfilled]: (state, action) => {
-            const surveyId = action.payload?.surveyId;
-            
-            if (surveyId) {
-                state.responses = [...state.responses, action.payload];
-                state.submittedSurveys[surveyId] = true; // Set the survey as submitted
-                state.submissionSuccess = true;
-            } else {
-                console.error('No surveyId provided in response');
-            }
-        },
-        [storeResponse.rejected]: (state, action) => {
-            state.error = action.payload || 'Could not store response';
-        },
-        [fetchAllSurveys.fulfilled]: (state, action) => {
-            console.log('Surveys fetched:', action);
-            state.surveys = action.payload;
-            if (!state.surveyId && state.surveys.length > 0) {
-                state.surveyId = state.surveys[0].id; // Only set this if surveyId isn't already set
-            }
-            state.surveys.forEach((survey) => {
-                // get each survey id and set it the surveyId state
-                state.surveyId = survey.id;
-               // Check if the survey has a 'submitted' property and if it's true
-                if (survey.hasOwnProperty('submitted') && survey.submitted === true) {
-                    console.log(`Survey with ID ${survey.id} has been submitted.`);
-                    // Here you can do additional processing if needed
+    extraReducers: (builders) => {
+        builders
+            .addCase(fetchSurveyQuestions.pending, (state) => { 
+                state.loading = true;
+            })
+            .addCase(fetchSurveyQuestions.fulfilled, (state, action) => {
+                state.questions = action.payload;
+                state.loading = false;
+            })
+            .addCase(fetchSurveyQuestions.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || 'Could not fetch questions';
+            })
+            .addCase(storeResponse.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(storeResponse.fulfilled, (state, action) => {
+                const surveyId = action.payload?.surveyId;
+
+                if (surveyId) {
+                    state.responses = [...state.responses, action.payload];
+                    state.submittedSurveys[surveyId] = true; // Set the survey as submitted
+                    state.submissionSuccess = true;
                 } else {
-                    console.log(`Survey with ID ${survey.id} has not been submitted.`);
-                    // Any other processing for surveys that have not been submitted
+                    console.error('No surveyId provided in response');
                 }
-            });  
-        },
-        [fetchAllSurveys.rejected]: (state, action) => {
-            state.error = action.payload || 'Could not fetch surveys';
-        }
+                state.loading = false;
+            })
+            .addCase(storeResponse.rejected, (state, action) => {
+                state.error = action.payload || 'Could not store response';
+            })
+            .addCase(fetchAllSurveys.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchAllSurveys.fulfilled, (state, action) => {
+                console.log('Surveys fetched:', action.payload); // Assuming action.payload is the array of surveys
+                state.loading = false;
+                state.surveys = action.payload;
+                if (!state.surveyId && state.surveys.length > 0) {
+                    state.surveyId = state.surveys[0].id; // Only set this if surveyId isn't already set
+                }
+
+                state.surveys.forEach((survey) => {
+                    // Check the submission status using the submittedSurveys state
+                    if (state.submittedSurveys[survey.id]) {
+                        console.log(`Survey with ID ${survey.id} has been submitted.`);
+                    } else {
+                        console.log(`Survey with ID ${survey.id} has not been submitted.`);
+                    }
+                });
+            })
+            .addCase(fetchAllSurveys.rejected, (state, action) => {
+                state.error = action.payload || 'Could not fetch surveys';
+            });
     },
 });
 
-export const { setAnswers, setSurveyId, setSurvey, markSurveyAsSubmitted } = surveySlice.actions;
+export const { setAnswers, setSurveyId, setSurvey, markSurveyAsSubmitted, resetSubmissionState, resetSubmittedSurveys } = surveySlice.actions;
 
 export default surveySlice.reducer;

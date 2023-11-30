@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 // Components
 import SurveyQuestionsList from './SurveyQuestionsList';
+import CenteredSpinner from './layout/CenteredSpinner';
+import ErrorBoundary from './ErrorBoundary';
 
 // Redux Actions
 import { storeResponse, markSurveyAsSubmitted } from '../store/slices/surveySlice';
@@ -16,7 +18,6 @@ import { Flex, Box, Button, Text } from '@chakra-ui/react';
 
 // Auth0 hook
 import { useAuth0 } from '@auth0/auth0-react'; 
-import CenteredSpinner from './layout/CenteredSpinner';
 
 const SurveyForm = () => {
     const dispatch = useDispatch();
@@ -45,13 +46,11 @@ const SurveyForm = () => {
     useEffect(() => {
         if (submissionSuccess) {
             setTimeout(() => {
-                // dispatch(logout());
-                // auth0Logout({ returnTo: window.location.origin }); 
+                dispatch(logout());
+                auth0Logout({ returnTo: window.location.origin }); 
             }, 3000);
         }
     }, [submissionSuccess, dispatch, auth0Logout]);
-
-    console.log(submissionSuccess)
     
     if (submissionSuccess) {
         return (
@@ -68,12 +67,14 @@ const SurveyForm = () => {
                 {loading && <div><CenteredSpinner /></div>}
                 {error && <div>Error: {error}</div>}
                 {!loading && !error && (
-                    <SurveyQuestionsList 
-                        key={questions.id}
-                        questionId={questions.id} 
-                        questions={questions} 
-                        answers={answers} 
-                    />
+                    <ErrorBoundary>
+                        <SurveyQuestionsList 
+                            key={questions.id}
+                            questionId={questions.id} 
+                            questions={questions} 
+                            answers={answers} 
+                        />
+                    </ErrorBoundary>
                 )}
                 <Button colorScheme="blue" type="submit" mt={4}>Submit</Button> 
             </Flex>

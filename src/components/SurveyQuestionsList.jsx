@@ -4,6 +4,9 @@ import SurveyQuestion from './SurveyQuestion';
 
 const SurveyQuestionsList = () => {
     const questions = useSelector(state => state.survey.questions);
+
+    console.log('Questions:', questions);
+
     return (
         <div>
             {questions.slice(0, 10).map(question => (

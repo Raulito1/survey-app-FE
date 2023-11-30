@@ -14,14 +14,17 @@ import SurveyForm from './SurveyForm';
 import { useSelector, useDispatch } from 'react-redux';
 
 // Redux Actions
-import { setSurvey } from '../store/slices/surveySlice';
+import { setSurvey, resetSubmissionState } from '../store/slices/surveySlice';
 
 const SurveyDetail = () => {
     const { surveyId } = useParams();
     const dispatch = useDispatch();
     const survey = useSelector(state => state.survey.survey);
+    const surveyQuestions = useSelector(state => state.survey.questions);
 
     useEffect(() => {
+        dispatch(resetSubmissionState());
+
         const fetchSurvey = async () => {
             try {
                 const data = await surveyService.getSurveyById(surveyId);
@@ -31,7 +34,6 @@ const SurveyDetail = () => {
                 // Handle error
             }
         };
-
         fetchSurvey();
     }, [surveyId, dispatch]);
 
@@ -39,9 +41,11 @@ const SurveyDetail = () => {
         return <div><CenteredSpinner /></div>;
     }
 
+    console.log('Survey:', survey);
+
     return (
         <div>
-            <SurveyForm />
+            <SurveyForm questions={surveyQuestions}/>
         </div>
     );
 };

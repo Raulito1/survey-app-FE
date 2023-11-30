@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
-    Input,
     RadioGroup,
     Stack,
     Radio,
@@ -11,6 +10,7 @@ import {
     SliderTrack,
     SliderFilledTrack,
     SliderThumb,
+    Textarea,
     Tooltip
 } from '@chakra-ui/react';
 
@@ -28,7 +28,13 @@ const QuestionTypeRenderer = ({ questionId, options, type }) => {
 
     switch (type) {
         case 'text':
-            return <Input placeholder="Type your answer here..." onChange={(e) => handleChange(e.target.value)} />;
+            return (
+                <Textarea 
+                    placeholder="Type your answer here..." 
+                    onChange={(e) => handleChange(e.target.value)}
+                    size="sm" 
+                />
+            );
         case 'boolean':
             return (
                 <RadioGroup onChange={(e) => handleChange(e.target.value === 'true')}>

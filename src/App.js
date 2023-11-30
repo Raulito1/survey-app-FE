@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth0 } from '@auth0/auth0-react';
 
 // redux
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 // chakra ui
 import { ChakraProvider } from '@chakra-ui/react';
@@ -22,25 +22,33 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SurveyList from './components/SurveyList';
 import SurveyDetail from './components/SurveyDetail';
 
-// reduc slices
-import { fetchSurveyQuestions } from './store/slices/surveySlice';
-import { login } from './store/slices/authSlice';
+// reduce slices
+import { fetchAllSurveys } from './store/slices/surveySlice';
+import { login, getUserRoles } from './store/slices/authSlice';
 
 const App = () => {
-  const { isAuthenticated, user } = useAuth0();
+  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
+  const surveysLoaded = useSelector(state => state.survey.surveysLoaded);
+  const userRoles = useSelector((state) => state.auth.roles); // Retrieve roles from Redux store
+
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      dispatch(fetchSurveyQuestions());
-      console.log('User:', user);
-      dispatch(login(user.sub)); // Dispatch login action with userId
-  }
-}, [isAuthenticated, user, dispatch]);
+      dispatch(fetchAllSurveys());
+      dispatch(login(user.sub));
+      dispatch(getUserRoles(getAccessTokenSilently))
+    }
+  }, [isAuthenticated, user, surveysLoaded, getAccessTokenSilently, dispatch]);
+
+// Log the roles to the console
+useEffect(() => {
+  console.log('User roles:', userRoles);
+}, [userRoles]);
 
   return (
     <ChakraProvider>
-      <Navbar />
+      <Navbar user={user} />
       <Router>
         <Routes>
           <Route path="/" element={!isAuthenticated ? <Login /> : <Navigate to="/survey-list" />} />
