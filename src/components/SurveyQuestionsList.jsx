@@ -1,5 +1,7 @@
-import React from 'react';
+// Redux Hooks
 import { useSelector } from 'react-redux';
+
+// Custom Components
 import SurveyQuestion from './SurveyQuestion';
 
 const SurveyQuestionsList = () => {
@@ -10,10 +12,7 @@ const SurveyQuestionsList = () => {
             {questions.slice(0, 10).map(question => (
                 <SurveyQuestion
                     key={question.id}
-                    question={question.content}
-                    questionId={question.id}
-                    options={question.options}
-                    type={question.type}
+                    survey={question}
                 />
             ))}
         </div>

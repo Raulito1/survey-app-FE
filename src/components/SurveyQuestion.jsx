@@ -1,18 +1,18 @@
-import React from 'react';
-
 // Custom Components
 import QuestionTypeRenderer from './QuestionTypeRenderer';
 
 // Imports for Chakra-UI components
 import { Box, Text } from '@chakra-ui/react';
 
-const SurveyQuestion = ({ questionId, question, options, type, answer }) => {
+const SurveyQuestion = ({ survey }) => {
+    const { content, type, id, options } = survey;
+    
     return (
         <Box mb={4}> 
-            <Text fontSize="lg" mb={2}>{question}</Text>
+            <Text fontSize='lg' mb={2}>{content}</Text>
             <QuestionTypeRenderer 
                 type={type} 
-                questionId={questionId}
+                questionId={id}
                 options={options} 
             />
         </Box>

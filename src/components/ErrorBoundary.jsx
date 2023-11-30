@@ -7,8 +7,11 @@ import { Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react
 
 class ErrorBoundary extends Component {
   constructor(props) {
+
     super(props);
     this.state = { hasError: false };
+
+    console.log('ErrorBoundary props:', props);
   }
 
   static getDerivedStateFromError(error) {
@@ -25,7 +28,7 @@ class ErrorBoundary extends Component {
     if (this.state.hasError) {
       // Render custom fallback UI
       return (
-        <Alert status="error">
+        <Alert status='error'>
           <AlertIcon />
           <AlertTitle mr={2}>Error!</AlertTitle>
           <AlertDescription>{this.props.error || 'Something went wrong.'}</AlertDescription>
@@ -38,7 +41,7 @@ class ErrorBoundary extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  error: state.error.error, // Adjust according to the state structure in errorSlice
+  error: state.error, 
 });
 
 const mapDispatchToProps = {

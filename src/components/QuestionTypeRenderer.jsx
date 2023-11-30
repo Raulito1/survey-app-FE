@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
+
+// Redux Hooks
 import { useDispatch } from 'react-redux';
+
+// Chakra UI Components
 import {
     RadioGroup,
     Stack,
@@ -14,6 +18,7 @@ import {
     Tooltip
 } from '@chakra-ui/react';
 
+// Redux Actions
 import { setAnswers } from '../store/slices/surveySlice';
 
 const QuestionTypeRenderer = ({ questionId, options, type }) => {
@@ -32,24 +37,24 @@ const QuestionTypeRenderer = ({ questionId, options, type }) => {
         case 'text':
             return (
                 <Textarea 
-                    placeholder="Type your answer here..." 
+                    placeholder='Type your answer here...' 
                     onChange={(e) => handleChange(e.target.value)}
-                    size="sm" 
+                    size='sm' 
                 />
             );
         case 'boolean':
             return (
                 <RadioGroup onChange={(e) => handleChange(e.target.value === 'true')}>
-                    <Stack direction="row">
-                        <Radio value="true">Yes</Radio>
-                        <Radio value="false">No</Radio>
+                    <Stack direction='row'>
+                        <Radio value='true'>Yes</Radio>
+                        <Radio value='false'>No</Radio>
                     </Stack>
                 </RadioGroup>
             );
         case 'single-select':
             return (
                 <RadioGroup onChange={(e) => handleChange(e.target.value)}>
-                    <Stack direction="column">
+                    <Stack direction='column'>
                         {options.map((option, index) => (
                             <Radio key={index} value={option}>{option}</Radio>
                         ))}
@@ -62,7 +67,7 @@ const QuestionTypeRenderer = ({ questionId, options, type }) => {
                     setSelectedOptions(values); 
                     handleChange(values); 
                 }}>
-                    <Stack direction="column">
+                    <Stack direction='column'>
                         {options.map((option, index) => (
                             <Checkbox key={index} value={option}>{option}</Checkbox>
                         ))}
@@ -89,19 +94,19 @@ const QuestionTypeRenderer = ({ questionId, options, type }) => {
                     <Tooltip
                         hasArrow
                         label={sliderValue.toString()}
-                        placement="top"
+                        placement='top'
                         isOpen={showTooltip}
-                        bg="gray.300"
-                        color="black"
+                        bg='gray.300'
+                        color='black'
                     >
-                        <SliderThumb fontSize="sm" boxSize="32px" />
+                        <SliderThumb fontSize='sm' boxSize='32px' />
                     </Tooltip>
                 </Slider>
             );
             case 'multiple-choice':
                 return (
                     <RadioGroup onChange={(value) => handleChange(value)}>
-                        <Stack direction="column">
+                        <Stack direction='column'>
                             {options.map((option, index) => (
                                 <Radio key={index} value={option}>{option}</Radio>
                             ))}

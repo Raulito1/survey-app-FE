@@ -57,8 +57,8 @@ const EditSurvey = () => {
     }
 
     return (
-        <Container maxW="container.md" p={4}>
-            <VStack spacing={4} align="stretch">
+        <Container maxW='container.md' p={4}>
+            <VStack spacing={4} align='stretch'>
                 <FormControl>
                     <FormLabel>Survey Title</FormLabel>
                     <Input value={survey.title} onChange={(e) => updateTitle(e.target.value)} />
@@ -69,7 +69,7 @@ const EditSurvey = () => {
                 </FormControl>
                 {survey.questions.map((question, index) => (
                     <HStack key={index}>
-                        <VStack align="stretch">
+                        <VStack align='stretch'>
                             <FormControl>
                                 <FormLabel>Question {index + 1}</FormLabel>
                                 <Input value={question.question} onChange={(e) => updateQuestion(index, 'question', e.target.value)} />
@@ -83,13 +83,13 @@ const EditSurvey = () => {
                             {/* Render options based on question type */}
                         </VStack>
                         <IconButton
-                            aria-label="Remove question"
+                            aria-label='Remove question'
                             icon={<CloseIcon />}
                             onClick={() => removeQuestion(index)}
                         />
                     </HStack>
                 ))}
-                <Button colorScheme="blue" onClick={handleUpdateSurvey}>Update Survey</Button>
+                <Button colorScheme='blue' onClick={handleUpdateSurvey}>Update Survey</Button>
             </VStack>
         </Container>
     );

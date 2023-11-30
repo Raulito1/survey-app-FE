@@ -10,6 +10,7 @@ import { surveyService } from '../services/surveyService';
 import CenteredSpinner from './layout/CenteredSpinner';
 import SurveyForm from './SurveyForm';
 import Title from './layout/Title';
+import NotificationToast from './layout/NotificationToast';
 
 // Redux Hooks
 import { useSelector, useDispatch } from 'react-redux';
@@ -22,6 +23,7 @@ const SurveyDetail = () => {
     const dispatch = useDispatch();
     const survey = useSelector(state => state.survey.survey);
     const surveyQuestions = useSelector(state => state.survey.questions);
+    const { showToast } = NotificationToast();
 
     useEffect(() => {
         dispatch(resetSubmissionState());
@@ -31,8 +33,12 @@ const SurveyDetail = () => {
                 const data = await surveyService.fetchSurveyById(surveyId);
                 dispatch(setSurvey(data));
             } catch (error) {
-                console.error('Error fetching survey:', error);
-                // Handle error
+                console.error('Error fetching survey: detail', error);
+                showToast({
+                    title: 'Failed to fetch survey!',
+                    description: error.message,
+                    status: 'error'
+                });
             }
         };
         fetchSurvey();
@@ -41,6 +47,8 @@ const SurveyDetail = () => {
     if (!survey) {
         return <div><CenteredSpinner /></div>;
     }
+
+    console.log('Survey Detail: ', surveyQuestions);
 
     return (
         <div>

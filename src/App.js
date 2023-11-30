@@ -46,14 +46,14 @@ const App = () => {
       <Router>
         <Navbar user={user} />
         <Routes>
-          <Route path="/" element={!isAuthenticated ? <Login /> : <Navigate to="/survey-list" />} />
-          <Route path="/surveys/:surveyId" element={<SurveyDetail />} />
-          <Route path="/survey-list" element={<SurveyList />} />
-          <Route path="/create-survey" element={<ProtectedRoute component={CreateSurvey} />} />
-          <Route path="/edit-survey" element={<ProtectedRoute component={SurveyList} />} />
-          <Route path="/edit-survey/:surveyId" element={<ProtectedRoute component={EditSurvey}/>} />
-          <Route path="/delete-survey" element={<ProtectedRoute component={DeleteSurvey} />} />
-          <Route path="/refresh-survey" element={<ProtectedRoute component={SurveyList} />} />
+          <Route path='/' element={!isAuthenticated ? <Login /> : <Navigate to='/survey-list' />} />
+          <Route path='/surveys/:surveyId' element={<SurveyDetail />} />
+          <Route path='/survey-list' element={<SurveyList />} />
+          <Route path='/create-survey' element={<ProtectedRoute component={CreateSurvey} />} />
+          <Route path='/edit-survey' element={<ProtectedRoute component={SurveyList} />} />
+          <Route path='/edit-survey/:surveyId' element={<ProtectedRoute component={EditSurvey}/>} />
+          <Route path='/delete-survey' element={<ProtectedRoute component={DeleteSurvey} />} />
+          <Route path='/refresh-survey' element={<ProtectedRoute component={SurveyList} />} />
           {/* add other routes */}
         </Routes>
       </Router>

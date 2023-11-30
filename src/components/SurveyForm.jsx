@@ -1,79 +1,72 @@
 import React, { useEffect } from 'react';
 
-// Redux Hooks
-import { useSelector, useDispatch } from 'react-redux';
+// Chakra UI Components
+import { Button, Flex } from '@chakra-ui/react';
 
-// react-router
+// React Router
 import { useNavigate } from 'react-router-dom';
 
-// Components
-import SurveyQuestionsList from './SurveyQuestionsList';
-import CenteredSpinner from './layout/CenteredSpinner';
-import ErrorBoundary from './ErrorBoundary';
+// Redux
+import { useDispatch, useSelector } from 'react-redux';
 
 // Redux Actions
-import { storeResponse, markSurveyAsSubmitted } from '../store/slices/surveySlice';
-import  { logError } from '../store/slices/errorSlice';
+import { submitSurveyResponses } from '../store/slices/surveySlice';
 
-// Chakra UI Components
-import { Flex, Box, Button, Text } from '@chakra-ui/react';
+// Custom Components
+import CenteredSpinner from './layout/CenteredSpinner';
+import NotificationToast from './layout/NotificationToast';
+import ErrorBoundary from './ErrorBoundary';
+import SurveyQuestionsList from './SurveyQuestionsList';
 
 const SurveyForm = () => {
     const dispatch = useDispatch();
     const survey = useSelector(state => state.survey);
-    const { questions, answers, loading, error, surveyId, submissionSuccess } = survey;
-    const userId = useSelector(state => state.auth.userId);
+    const { loading, error, submissionSuccess } = survey;
     const navigate = useNavigate();
+    const { showToast } = NotificationToast();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const response = {
-            responses: Object.entries(answers).map(([questionId, answer]) => ({
-                questionId: parseInt(questionId),
-                answer: answer || null
-            }))
-        };
-        
-        try {
-            await dispatch(storeResponse({ userId, surveyId, response })).unwrap();
-            dispatch(markSurveyAsSubmitted({ surveyId }));
-        } catch (error) {
-            dispatch(logError(error.message));
-        }
+        console.log('Survey Form submit: ', survey);
+        // submitSurveyResponses(dispatch, survey);
     };
 
     useEffect(() => {
         if (submissionSuccess) {
-            setTimeout(() => {
-                navigate('/');
-            }, 3000);
+            showToast({
+                title: 'Success',
+                description: 'Survey submitted successfully!',
+                status: 'success'
+            });
+
+            setTimeout(() => navigate('/'), 3000);
         }
-    }, [submissionSuccess, navigate]);
-    
-    if (submissionSuccess) {
-        return (
-            <Box textAlign="center" py={10}>
-                <Text fontSize="2xl">Thank you for submitting your feedback!</Text>
-            </Box>
-        );
-    }
+    }, [submissionSuccess, navigate, showToast]);
+
+    useEffect(() => {
+        if (error) {
+            showToast({
+                title: 'Failed to submit survey!',
+                description: error,
+                status: 'error'
+            });
+        }
+    }, [error, showToast]);
 
     return (
-        <form type="submit" onSubmit={handleSubmit} style={{ paddingTop: '20px' }}>
-            <Flex direction="column" align="center" justify="center">
-                {loading && <div><CenteredSpinner /></div>}
-                {error && <div>Error: {error}</div>}
+        <form onSubmit={handleSubmit} style={{ paddingTop: '20px' }}>
+            <Flex direction='column' align='center' justify='center'>
+                {loading && <CenteredSpinner />}
                 {!loading && !error && (
                     <ErrorBoundary>
                         <SurveyQuestionsList 
-                            key={questions.id}
-                            questionId={questions.id} 
-                            questions={questions} 
-                            answers={answers} 
+                            key={survey.surveyId}
+                            questions={survey.questions} 
+                            answers={survey.answers} 
                         />
                     </ErrorBoundary>
                 )}
-                <Button colorScheme="blue" type="submit" mt={4}>Submit</Button> 
+                <Button colorScheme='blue' type='submit' mt={4}>Submit</Button>
             </Flex>
         </form>
     );

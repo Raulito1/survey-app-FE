@@ -12,29 +12,30 @@ export const storeResponse = async (userId, surveyId, response) => {
                 responses: response
             })    
         });
-
-        if (!res.ok) {
-            throw new Error('Network response was not ok');
-        }
-
         const data = await res.json();
+
         return data;
     } catch (error) {
-        console.error('Error in storeResponse:', error);
-        throw error;
+        if (error) {
+            throw new Error('Failed to store response at the moment, please check back later');
+        } else {
+            throw error;
+        }
     }
 };
 
 const getResponses = async (surveyId, userId) => {
-    console.log('Fetching responses:', { surveyId, userId });
     try {
         const response = await fetch(`${BASE_URL}/answers?surveyId=${surveyId}&userId=${userId}`);
         const data = await response.json();
         console.log('Responses received:', data);
         return data;
     } catch (error) {
-        console.error('Error in getResponses:', error);
-        throw error;
+        if (error) {
+            throw new Error('Failed to retrieve responses at the moment, please check back later');
+        } else {
+            throw error;
+        }
     }
 };
 
@@ -50,8 +51,11 @@ const createSurvey = async (surveyCreateDTO) => {
         console.log('Survey created:', data);
         return data;
     } catch (error) {
-        console.error('Error in createSurvey:', error);
-        throw error;
+        if (error) {
+            throw new Error('Failed to create a new survey at this time, please check back later');
+        } else {
+            throw error;
+        }
     }
 };
 
@@ -62,42 +66,68 @@ const deleteSurvey = async (surveyId) => {
             method: 'DELETE'
         });
         const data = await response.json();
-        console.log('Survey deleted:', data);
+
         return data;
     } catch (error) {
-        console.error('Error in deleteSurvey:', error);
-        throw error;
+        if (error) {
+            throw new Error(`Failed to delete ${surveyId} at the moment, please check back later`);
+        } else {
+            throw error;
+        }
     }
 };
 
-const getAllSurveys = async () => {
+const fetchAllSurveys = async () => {
     try {
         const response = await fetch(`${BASE_URL}/surveys`);
-        if (!response.ok) {
-            // Handle non-OK responses here
-            console.error(`HTTP error! status: ${response.status}`);
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
         const data = await response.json();
-        console.log('All surveys:', data);
+        
         return data;
     } catch (error) {
-        console.error('Error in getAllSurveys:', error);
-        throw error;
+        if (error) {
+            throw new Error('Failed to fetch surveys at the moment, please check back later');
+        } else {
+            throw error;
+        }
     }
 };
 
 
 const fetchSurveyById = async (surveyId) => {
-    console.log('Fetching survey by ID:', surveyId);
     try {
         const response = await fetch(`${BASE_URL}/surveys/${surveyId}`);
         const data = await response.json();
-        console.log('Survey data:', data);
+
         return data;
     } catch (error) {
-        console.error('Error in getSurveyById:', error);
-        throw error;
+        if (error) {
+            throw new Error(`Failed to fetch survey ${surveyId} at the moment, please check back later`);
+        } else {
+            throw error;
+        }
+    }
+};
+
+export const refreshSurvey = async (surveyId) => {
+    try {
+        // Simulate a refresh by updating the survey's lastRefreshed timestamp
+        const surveyData = {
+            lastRefreshed: new Date().toISOString(),
+        };
+        
+        const response = await fetch(`${BASE_URL}/surveys/${surveyId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(surveyData),
+        });
+
+        return await response.json();
+    } catch (error) {
+        if (error) {
+            throw new Error(`Failed to refresh survey ${surveyId} at the moment, please check back later`);
+        } else {
+            throw error;
+        }
     }
 };
 
@@ -107,5 +137,6 @@ export const surveyService = {
     fetchSurveyById,
     createSurvey,
     deleteSurvey,
-    getAllSurveys,
+    fetchAllSurveys,
+    refreshSurvey
 };

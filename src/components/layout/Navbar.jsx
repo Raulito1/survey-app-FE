@@ -35,44 +35,43 @@ const Navbar = ({ user }) => {
     };
 
     return (
-        <Flex bg="blue.500" color="white" px={4} py={3} alignItems="center">
-        <Box p="2">
-            <Text fontSize="xl" fontWeight="bold">The Survey App</Text>
+        <Flex bg='blue.500' color='white' px={4} py={3} alignItems='center'>
+        <Box p='2'>
+            <Text fontSize='xl' fontWeight='bold'>The Survey App</Text>
         </Box>
         <Spacer />
         {user && (
             <>
-            <Text fontSize="md" mr={4}>Welcome, {user.name || user.nickname}</Text>
+            <Text fontSize='md' mr={4}>Welcome, {user.name || user.nickname}</Text>
             <Menu>
-                <MenuButton as={Avatar} size="sm" name={user.name || user.nickname} src={user.picture} cursor="pointer" />
-                <MenuList bg="white" color="black">
+                <MenuButton as={Avatar} size='sm' name={user.name || user.nickname} src={user.picture} cursor='pointer' />
+                <MenuList bg='white' color='black'>
                     {!isHome && (
-                        <MenuItem as={Link} to="/survey-list" _hover={{ bg: "blue.500", color: "white" }}>
+                        <MenuItem as={Link} to='/survey-list' _hover={{ bg: 'blue.500', color: 'white' }}>
                             Go to Home
                         </MenuItem>
                     )}
                     {isAdmin && (
                         <>
-                            <MenuItem as={Link} to="/create-survey" _hover={{ bg: "blue.500", color: "white" }}>
+                            <MenuItem as={Link} to='/create-survey' _hover={{ bg: 'blue.500', color: 'white' }}>
                                 Create a Survey
                             </MenuItem>
-                            <MenuItem as={Link} to="/edit-survey" _hover={{ bg: "blue.500", color: "white" }}>
+                            <MenuItem as={Link} to='/edit-survey' _hover={{ bg: 'blue.500', color: 'white' }}>
                                 Edit a Survey
                             </MenuItem>
-                            <MenuItem as={Link} to="/delete-survey" _hover={{ bg: "blue.500", color: "white" }}>
+                            <MenuItem as={Link} to='/delete-survey' _hover={{ bg: 'blue.500', color: 'white' }}>
                                 Delete a Survey
                             </MenuItem>
-                            <MenuItem as={Link} to="/refresh-survey" _hover={{ bg: "blue.500", color: "white" }}>
+                            <MenuItem as={Link} to='/refresh-survey' _hover={{ bg: 'blue.500', color: 'white' }}>
                                 Refresh a Survey
                             </MenuItem>
                         </>
                         
                     )}
-                    <MenuItem _hover={{ bg: "blue.500", color: "white" }} onClick={handleLogout}>
+                    <MenuItem _hover={{ bg: 'blue.500', color: 'white' }} onClick={handleLogout}>
                         Logout
                     </MenuItem>
                 </MenuList>
-
             </Menu>
             </>
         )}

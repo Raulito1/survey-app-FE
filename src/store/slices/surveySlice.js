@@ -1,14 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
+// Import the surveyService from the services folder
 import { surveyService } from '../../services/surveyService';
+
+// Import the logError action creator from the errorSlice
+import { logError } from './errorSlice';
 
 // Async thunk for storing survey responses
 export const storeResponse = createAsyncThunk(
     'survey/storeResponse',
-    async ({ userId, surveyId, response }, { rejectWithValue }) => {
+    async ({ userId, surveyId, response }, { dispatch, rejectWithValue }) => {
         try {
             const data = await surveyService.storeResponse(userId, surveyId, response);
             return data;
         } catch (error) {
+            dispatch(logError(error.message));
+            console.error('Error storing response:', error);
             return rejectWithValue(error.message);
         }
     }
@@ -19,7 +26,7 @@ export const fetchSurveyQuestions = createAsyncThunk(
     'survey/fetchSurveyQuestions',
     async (_, { dispatch, getState, rejectWithValue }) => {
         try {
-            const response = await surveyService.getAllSurveys();
+            const response = await surveyService.fetchAllSurveys();
             const surveys = response;
 
             const currentSurveyId = getState().survey.surveyId;
@@ -30,6 +37,7 @@ export const fetchSurveyQuestions = createAsyncThunk(
             const allQuestions = surveys.flatMap(survey => survey.questions);
             return allQuestions;
         } catch (error) {
+            dispatch(logError(error.message));
             console.error('Error fetching surveys:', error);
             return rejectWithValue(error.response?.data || 'An unknown error occurred');
         }
@@ -39,12 +47,13 @@ export const fetchSurveyQuestions = createAsyncThunk(
 // Async thunk for fetching all the surveys
 export const fetchAllSurveys = createAsyncThunk(
     'survey/fetchAllSurveys',
-    async (_, { rejectWithValue }) => {
+    async (_, { dispatch, rejectWithValue }) => {
         try {
-            const response = await surveyService.getAllSurveys();
+            const response = await surveyService.fetchAllSurveys();
             return response; 
         }
         catch (error) {
+            dispatch(logError(error.message));
             console.error('Error fetching surveys:', error);
             return rejectWithValue(error.response?.data || 'An unknown error occurred');
         }
@@ -60,6 +69,8 @@ export const createSurvey = createAsyncThunk(
             dispatch(fetchAllSurveys());
             return data;
         } catch (error) {
+            dispatch(logError(error.message));
+            console.error('Error creating survey:', error);
             return rejectWithValue(error.message);
         }
     }
@@ -68,11 +79,13 @@ export const createSurvey = createAsyncThunk(
 // Async thunk for deleting a survey
 export const deleteSurvey = createAsyncThunk(
     'survey/deleteSurvey',
-    async (surveyId, { rejectWithValue }) => {
+    async (surveyId, { dispatch, rejectWithValue }) => {
         try {
             await surveyService.deleteSurvey(surveyId);
-            return surveyId;  // Returning the deleted survey's ID
+            return surveyId;
         } catch (error) {
+            dispatch(logError(error.message));
+            console.error('Error deleting survey:', error);
             return rejectWithValue(error.message);
         }
     }
@@ -81,13 +94,29 @@ export const deleteSurvey = createAsyncThunk(
 // Async thunk for fetching a survey by ID
 export const fetchSurveyById = createAsyncThunk(
     'survey/fetchSurveyById',
-    async (surveyId, { rejectWithValue }) => {
+    async (surveyId, { dispatch, rejectWithValue }) => {
         try {
             const response = await surveyService.fetchSurveyById(surveyId);
             return response;
         } catch (error) {
+            dispatch(logError(error.message));
             console.error('Error fetching survey by ID:', error);
             return rejectWithValue(error.response?.data || 'An unknown error occurred');
+        }
+    }
+);
+
+// Async thunk for refreshing a survey
+export const refreshSurvey = createAsyncThunk(
+    'survey/refreshSurvey',
+    async (surveyId, { dispatch, rejectWithValue }) => {
+        try {
+            const response = await surveyService.refreshSurvey(surveyId);
+            return response;
+        } catch (error) {
+            dispatch(logError(error.message));
+            console.error('Error refreshing survey:', error);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -104,7 +133,6 @@ export const surveySlice = createSlice({
         submissionSuccess: false,
         submission: false,
         loading: false,
-        error: null,
         surveyId: null,
         editingSurveyId: null,
     },
@@ -150,6 +178,10 @@ export const surveySlice = createSlice({
         setEditingSurveyId: (state, action) => {
             state.editingSurveyId = action.payload;
         },
+        toggleSurveySubmit: (state, action) => {
+            const surveyId = action.payload;
+            state.submittedSurveys[surveyId] = !state.submittedSurveys[surveyId];
+        },
     },
     extraReducers: (builders) => {
         builders
@@ -159,10 +191,6 @@ export const surveySlice = createSlice({
             .addCase(fetchSurveyQuestions.fulfilled, (state, action) => {
                 state.questions = action.payload;
                 state.loading = false;
-            })
-            .addCase(fetchSurveyQuestions.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload || 'Could not fetch questions';
             })
             .addCase(storeResponse.pending, (state) => {
                 state.loading = true;
@@ -179,14 +207,10 @@ export const surveySlice = createSlice({
                 }
                 state.loading = false;
             })
-            .addCase(storeResponse.rejected, (state, action) => {
-                state.error = action.payload || 'Could not store response';
-            })
             .addCase(fetchAllSurveys.pending, (state) => {
                 state.loading = true;
             })
             .addCase(fetchAllSurveys.fulfilled, (state, action) => {
-                console.log('Surveys fetched:', action.payload);
                 state.loading = false;
                 state.surveys = action.payload;
 
@@ -202,9 +226,6 @@ export const surveySlice = createSlice({
                     }
                 });
             })
-            .addCase(fetchAllSurveys.rejected, (state, action) => {
-                state.error = action.payload || 'Could not fetch surveys';
-            })
             .addCase(createSurvey.fulfilled, (state, action) => {
                 state.surveys.push(action.payload);
                 state.loading = false;
@@ -212,16 +233,8 @@ export const surveySlice = createSlice({
             .addCase(createSurvey.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(createSurvey.rejected, (state, action) => {
-                state.error = action.payload || 'Could not create survey';
-                state.loading = false;
-            })
             .addCase(deleteSurvey.fulfilled, (state, action) => {
                 state.surveys = state.surveys.filter(survey => survey.id !== action.payload);
-                state.loading = false;
-            })
-            .addCase(deleteSurvey.rejected, (state, action) => {
-                state.error = action.payload || 'Could not delete survey';
                 state.loading = false;
             })
             .addCase(fetchSurveyById.pending, (state) => {
@@ -230,15 +243,10 @@ export const surveySlice = createSlice({
             .addCase(fetchSurveyById.fulfilled, (state, action) => {
                 state.currentSurvey = action.payload;
                 state.loading = false;
-                state.error = null;
             })
-            .addCase(fetchSurveyById.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload || 'Failed to fetch survey';
-            });
     },
 });
 
-export const { setAnswers, setSurveyId, setSurvey, markSurveyAsSubmitted, resetSubmissionState, resetSubmittedSurveys, setEditingSurveyId } = surveySlice.actions;
+export const { setAnswers, setSurveyId, setSurvey, markSurveyAsSubmitted, resetSubmissionState, resetSubmittedSurveys, setEditingSurveyId, toggleSurveySubmit } = surveySlice.actions;
 
 export default surveySlice.reducer;

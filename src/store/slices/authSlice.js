@@ -3,15 +3,20 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // jwt decode is a simple library that decodes jwt tokens
 import  { jwtDecode }  from 'jwt-decode';
 
+// import the logError action creator from the errorSlice
+import { logError } from './errorSlice';
+
 export const getUserRoles = createAsyncThunk(
     'auth/getUserRoles',
-    async (getAccessTokenSilently, thunkAPI) => {
+    async (getAccessTokenSilently, { dispatch, rejectWithValue }) => {
         try {
             const token = await getAccessTokenSilently();
             const decodedToken = jwtDecode(token);
             return decodedToken['https://my-survey-app.com/roles'] || [];
         } catch (error) {
-            return thunkAPI.rejectWithValue(error.message);
+            dispatch(logError(error.message));
+            console.error('Error fetching user roles:', error);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -20,8 +25,7 @@ export const authSlice = createSlice({
     name: 'auth',
     initialState: {
         userId: null,
-        roles: [],
-        error: null
+        roles: []
     },
     reducers: {
         login: (state, action) => {
@@ -39,12 +43,6 @@ export const authSlice = createSlice({
         builder
             .addCase(getUserRoles.fulfilled, (state, action) => {
                 state.roles = action.payload;
-            })
-            .addCase(getUserRoles.rejected, (state, action) => {
-                state.error = action.payload;
-            })
-            .addCase(getUserRoles.pending, (state, action) => {
-                state.error = null;
             })
     },
 });

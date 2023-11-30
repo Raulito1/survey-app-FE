@@ -3,11 +3,13 @@ import React, { useState, useEffect } from 'react';
 // Redux Hooks
 import { useDispatch } from 'react-redux';
 
+// Redux Actions
 import { createSurvey } from '../store/slices/surveySlice';
 
 // React Router
 import { useNavigate } from 'react-router-dom';
 
+// Chakra UI Components
 import {
     Button,
     FormControl,
@@ -21,7 +23,6 @@ import {
     useToast,
     Container
 } from '@chakra-ui/react';
-
 import { CloseIcon } from '@chakra-ui/icons';
 
 const QuestionTypes = {
@@ -78,43 +79,41 @@ const CreateSurvey = () => {
     };
 
     const handleCreateSurvey = async () => {
-        // Validate data, then save/send
-        console.log({ surveyTitle, surveyDescription, questions });
         toast({
-            title: "Survey created.",
-            description: "Your survey has been successfully created!",
-            status: "success",
+            title: 'Survey created.',
+            description: 'Your survey has been successfully created!',
+            status: 'success',
             duration: 9000,
             isClosable: true,
         });
 
         const surveyData = {
-            title: surveyTitle,
-            description: surveyDescription,
-            questions: questions.map(({ question, type, options }) => ({
-                question,
-                type,
-                options: options.filter((option) => option !== '')
-            }))};
-            
-            try {
-                await dispatch(createSurvey(surveyData)).unwrap();
-                setSurveyCreated(true); // Set the state to true on successful creation
-            } catch (error) {
+        title: surveyTitle,
+        description: surveyDescription,
+        questions: questions.map(({ question, type, options }) => ({
+            question,
+            type,
+            options: options.filter((option) => option !== '')
+        }))};
+        
+        try {
+            await dispatch(createSurvey(surveyData)).unwrap();
+            setSurveyCreated(true);
+        } catch (error) {
             console.error('Failed to create survey:', error);
             // Handle the error state in your UI
-            }
         }
+    }
 
-        useEffect(() => {
-            if (surveyCreated) {
-              navigate('/survey-list'); // Navigate when the state changes
-            }
-        }, [surveyCreated, navigate]);
+    useEffect(() => {
+        if (surveyCreated) {
+            navigate('/survey-list');
+        }
+    }, [surveyCreated, navigate]);
 
     return (
-        <Container maxW="container.md" p={4}> {/* Container to control width and padding */}
-            <VStack spacing={4} align="stretch">
+        <Container maxW='container.md' p={4}>
+            <VStack spacing={4} align='stretch'>
             <FormControl>
                 <FormLabel>Survey Title</FormLabel>
                 <Input value={surveyTitle} onChange={(e) => setSurveyTitle(e.target.value)} />
@@ -125,7 +124,7 @@ const CreateSurvey = () => {
             </FormControl>
             {questions.map((question, index) => (
                 <HStack key={index}>
-                <VStack align="stretch">
+                <VStack align='stretch'>
                     <FormControl>
                     <FormLabel>Question {index + 1}</FormLabel>
                     <Input value={question.question} onChange={(e) => updateQuestion(index, 'question', e.target.value)} />
@@ -141,18 +140,18 @@ const CreateSurvey = () => {
                     </Select>
                     </FormControl>
                     {question.type !== QuestionTypes.SLIDER && question.type !== QuestionTypes.TEXT && (
-                    <VStack align="stretch">
+                    <VStack align='stretch'>
                         {question.options.map((option, optionIndex) => (
                         <HStack key={`option-${optionIndex}`}>
                             <Input
-                            value={option}
-                            onChange={(e) => updateOption(index, optionIndex, e.target.value)}
-                            placeholder={`Option ${optionIndex + 1}`}
+                                value={option}
+                                onChange={(e) => updateOption(index, optionIndex, e.target.value)}
+                                placeholder={`Option ${optionIndex + 1}`}
                             />
                             <IconButton
-                            aria-label="Remove option"
-                            icon={<CloseIcon />}
-                            onClick={() => removeOption(index, optionIndex)}
+                                aria-label='Remove option'
+                                icon={<CloseIcon />}
+                                onClick={() => removeOption(index, optionIndex)}
                             />
                         </HStack>
                         ))}
@@ -161,14 +160,14 @@ const CreateSurvey = () => {
                     )}
                 </VStack>
                 <IconButton
-                    aria-label="Remove question"
+                    aria-label='Remove question'
                     icon={<CloseIcon />}
                     onClick={() => removeQuestion(index)}
                 />
                 </HStack>
             ))}
             <Button onClick={addQuestion}>Add Question</Button>
-            <Button colorScheme="blue" onClick={handleCreateSurvey}>Create Survey</Button>
+            <Button colorScheme='blue' onClick={handleCreateSurvey}>Create Survey</Button>
             </VStack>
         </Container>
     );
