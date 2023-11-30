@@ -1,70 +1,94 @@
-# Getting Started with Create React App
+# Survey App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Survey App is a full-stack application designed to conduct surveys with a variety of question types. It leverages Spring Boot for the backend and React for the front end, with a focus on security and user-friendly design.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **SSO and ADFS Authentication**: Users are authenticated via Single Sign-On (SSO) for external users and Active Directory Federation Services (ADFS) for internal users, ensuring secure and streamlined access to the survey. Using [Auth0](https://auth0.com) to mimic this in the app in production, which uses Google sign-on. (To learn more about Auth0, click [here](https://auth0.com)).
+- **Role-Based Authorization**: Specific roles and permissions are enforced to authorize users to take the survey, maintaining the integrity of the survey process.
+- **Diverse Question Types**: Supports multiple question types such as sliders, multi-select, fill-in-the-blanks, and single-select multiple choice.
+- **API Interaction**: The application interacts with backend APIs for storing and retrieving survey answers, employing secure communication protocols.
+- **Reusable React Components**: Frontend built with reusable components for efficiency and maintainability, utilizing Redux for state management.
+- **Exception Handling**: Implements robust exception handling with user-friendly error messages and developer logs.
 
-### `npm start`
+## Technologies Used
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Auth0**: Manages authentication and role-based access control.
+- **JSON Server**: Simulates a backend database on `port 3001`, providing a mock REST API.
+- **Redux Toolkit (RTK)**: Manages application state and logic.
+- **Chakra UI**: Provides a modern, responsive user interface.
+- **Redux Persist**: Ensures state persistence across sessions.
+- **React Router**: Routing library used to manage routes.
+  
+## Security Measures
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Input validation to prevent malicious data entry.
+- HTTPS for secure data transmission.
+- Protection against common web vulnerabilities such as XSS and CSRF.
 
-### `npm test`
+## API Endpoints
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Surveys
 
-### `npm run build`
+- `GET /surveys`: Retrieves all surveys.
+- `GET /surveys/{surveyId}`: Retrieves a specific survey by ID.
+- `POST /surveys`: Creates a new survey with the provided survey data.
+- `DELETE /surveys/{surveyId}`: Deletes a specific survey by ID.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Responses
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- `POST /answers`: Stores a survey response with the user ID and survey ID.
+- `GET /answers`: Retrieves responses for a specific survey and user ID combination.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Example Requests
 
-### `npm run eject`
+### Store a Response
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- `POST /answers`:
+```
+Content-Type: application/json
+{
+    "id": "userId",
+    "surveyId": "surveyId",
+    "responses": "response"
+}
+```
+### Get a Responses
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+`GET /answers?surveyId={surveyId}&userId={userId}`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Create a Survey
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- `POST /surveys`:
+```
+Content-Type: application/json
 
-## Learn More
+{
+    "title": "Your Survey Title",
+    "description": "Survey Description",
+    "questions: [],
+    "responses": [],
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Delete a Survey
+`DELETE /surveys/{surveyId}`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Installation
 
-### Code Splitting
+- clone to local, `npm install`, then `npm run dev` to run app on `localhost:3000`
+- to run JSON server to mimic db - run: `json-server --watch db.json --port 3001`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## User Stories
 
-### Analyzing the Bundle Size
+- As an external user, I want to authenticate via Google to take the survey.
+- As an admin, I want to view survey results and manage permissions.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Internal Application Design
 
-### Making a Progressive Web App
+For the internal version of the application, used by the sales and marketing teams, authentication will be managed by ADFS, with a focus on internal user roles and permissions. In this app 
+using Auth0 to handle this, this is for example use only.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Exception Handling Strategy
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The application will present users with clear error messages when issues occur and log detailed error information for developers to troubleshoot.
