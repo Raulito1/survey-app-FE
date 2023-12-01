@@ -5,11 +5,10 @@ import QuestionTypeRenderer from './QuestionTypeRenderer';
 import { Box, Text } from '@chakra-ui/react';
 
 const SurveyQuestion = ({ survey }) => {
-    const { content, type, id, options } = survey;
-    
+    const { question, type, id, options } = survey;
     return (
         <Box mb={4}> 
-            <Text fontSize='lg' mb={2}>{content}</Text>
+            <Text fontSize='lg' mb={2}>{question}</Text>
             <QuestionTypeRenderer 
                 type={type} 
                 questionId={id}

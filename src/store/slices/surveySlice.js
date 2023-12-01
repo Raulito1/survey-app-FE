@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 
 // Import the surveyService from the services folder
 import { surveyService } from '../../services/surveyService';
@@ -121,10 +121,34 @@ export const refreshSurvey = createAsyncThunk(
     }
 );
 
+// Async thunk for updating survey details
+export const updateSurveyDetails = createAsyncThunk(
+    'survey/updateSurveyDetails',
+    async (surveyData, { dispatch, getState, rejectWithValue }) => {
+        try {
+            await surveyService.updateSurvey(surveyData);
+            return surveyData;
+        } catch (error) {
+            dispatch(logError(error.message));
+            console.error('Error refreshing survey:', error);
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+const QuestionTypes = {
+    SINGLE_SELECT: 'single-select',
+    MULTI_SELECT: 'multi-select',
+    SLIDER: 'slider',
+    BOOLEAN: 'boolean',
+    TEXT: 'text'
+};
+
 export const surveySlice = createSlice({
     name: 'survey',
     initialState: {
         questions: [],
+        questionsBySurveyId: {},
         responses: [],
         surveys: [],
         answers: {},
@@ -134,7 +158,13 @@ export const surveySlice = createSlice({
         submission: false,
         loading: false,
         surveyId: null,
+        surveyTitle: '',
         editingSurveyId: null,
+        newSurvey: {
+            title: '',
+            description: '',
+            questions: []
+        }
     },
     reducers: {
         setAnswers: (state, action) => {
@@ -157,23 +187,17 @@ export const surveySlice = createSlice({
             state.surveyId = action.payload;
         },
         setSurvey: (state, action) => {
-            state.survey = action.payload;
-            state.surveyId = action.payload.id;
-            state.questions = action.payload.questions;
+            state.currentSurvey = action.payload;
         },
         markSurveyAsSubmitted: (state, action) => {
             const surveyId = action.payload;
             state.submittedSurveys[surveyId] = true;
         },
-        resetSubmissionState: (state) => {
+        resetSurveyState: (state) => {
             state.submissionSuccess = false;
         },
-        resetSubmittedSurveys: (state, action) => {
-            const surveyId = action.payload;
-
-            if (state.submittedSurveys[surveyId]) {
-                delete state.submittedSurveys[surveyId];
-            }
+        resetSubmissionState: (state) => {
+            state.submissionSuccess = false;
         },
         setEditingSurveyId: (state, action) => {
             state.editingSurveyId = action.payload;
@@ -181,6 +205,56 @@ export const surveySlice = createSlice({
         toggleSurveySubmit: (state, action) => {
             const surveyId = action.payload;
             state.submittedSurveys[surveyId] = !state.submittedSurveys[surveyId];
+        },
+        updateNewSurveyTitle: (state, action) => {
+            state.newSurvey.title = action.payload;
+        },
+        updateNewSurveyDescription: (state, action) => {
+            state.newSurvey.description = action.payload;
+        },
+        addNewSurveyQuestion: (state) => {
+            state.newSurvey.questions.push({ question: '', type: QuestionTypes.SINGLE_SELECT, options: [] });
+        },
+        updateNewSurveyQuestion: (state, action) => {
+            const { index, field, value } = action.payload;
+            state.newSurvey.questions[index] = { ...state.newSurvey.questions[index], [field]: value };
+        },
+        removeNewSurveyQuestion: (state, action) => {
+            state.newSurvey.questions.splice(action.payload, 1);
+        },
+        addOptionToNewSurveyQuestion: (state, action) => {
+            const questionIndex = action.payload;
+            state.newSurvey.questions[questionIndex].options.push('');
+        },
+        updateOptionInNewSurveyQuestion: (state, action) => {
+            const { questionIndex, optionIndex, value } = action.payload;
+            state.newSurvey.questions[questionIndex].options[optionIndex] = value;
+        },
+        removeOptionFromNewSurveyQuestion: (state, action) => {
+            const { questionIndex, optionIndex } = action.payload;
+            state.newSurvey.questions[questionIndex].options.splice(optionIndex, 1);
+        },
+        updateSurveyTitle: (state, action) => {
+            if (state.currentSurvey) {
+                state.currentSurvey.title = action.payload;
+            }
+        },
+        updateSurveyDescription: (state, action) => {
+            if (state.currentSurvey) {
+                state.currentSurvey.description = action.payload;
+            }
+        },
+        updateSurveyQuestion: (state, action) => {
+            const { index, field, value } = action.payload;
+            if (state.currentSurvey && state.currentSurvey.questions[index]) {
+                state.currentSurvey.questions[index][field] = value;
+            }
+        },
+        removeSurveyQuestion: (state, action) => {
+            const index = action.payload;
+            if (state.currentSurvey) {
+                state.currentSurvey.questions.splice(index, 1);
+            }
         },
     },
     extraReducers: (builders) => {
@@ -214,9 +288,11 @@ export const surveySlice = createSlice({
                 state.loading = false;
                 state.surveys = action.payload;
 
-                if (!state.surveyId && state.surveys.length > 0) {
-                    state.surveyId = state.surveys[0].id;
-                }
+                state.questionsBySurveyId = {};
+
+                action.payload.forEach((survey) => {
+                    state.questionsBySurveyId[survey.id] = survey.questions;
+                });
 
                 state.surveys.forEach((survey) => {
                     if (state.submittedSurveys[survey.id]) {
@@ -241,12 +317,74 @@ export const surveySlice = createSlice({
                 state.loading = true;
             })
             .addCase(fetchSurveyById.fulfilled, (state, action) => {
-                state.currentSurvey = action.payload;
                 state.loading = false;
+                state.currentSurvey = action.payload;
+                if (action.payload.questions) {
+                    state.questionsBySurveyId[action.payload.id] = action.payload.questions;
+                }
+                state.loading = false;
+            })
+            .addCase(refreshSurvey.fulfilled, (state, action) => {
+                const surveyIndex = state.surveys.findIndex(survey => survey.id === action.payload.id);
+                if (surveyIndex !== -1) {
+                    state.surveys[surveyIndex].lastRefreshed = action.payload.lastRefreshed;
+                }
+            })
+            .addCase(updateSurveyDetails.fulfilled, (state, action) => {
+                const index = state.surveys.findIndex(s => s.id === action.payload.id);
+                if (index !== -1) {
+                    state.surveys[index] = action.payload;
+                }
             })
     },
 });
 
-export const { setAnswers, setSurveyId, setSurvey, markSurveyAsSubmitted, resetSubmissionState, resetSubmittedSurveys, setEditingSurveyId, toggleSurveySubmit } = surveySlice.actions;
+export const markSurveyAsUnsubmitted = surveyId => (dispatch, getState) => {
+    const { submittedSurveys } = getState().survey;
+
+    console.log('Submitted surveys:', submittedSurveys);
+    if (submittedSurveys[surveyId]) {
+        dispatch(surveySlice.actions.toggleSurveySubmit(surveyId));
+    }
+};
+
+export const resetSurveyForm = () => (dispatch) => {
+    dispatch(surveySlice.actions.resetSurveyState());
+};
+
+export const selectCurrentSurveyQuestions = createSelector(
+    state => state.survey.currentSurvey,
+    currentSurvey => currentSurvey?.questions || []
+);
+
+export const selectSurveyById = createSelector(
+    [state => state.survey.surveys, (_, surveyId) => surveyId],
+    (surveys, surveyId) => surveys.find(s => s.id.toString() === surveyId)
+);
+
+export const selectQuestionsForCurrentSurvey = createSelector(
+    [state => state.survey.currentSurveyId, state => state.survey.questionsBySurveyId],
+    (currentSurveyId, questionsBySurveyId) => {
+        return questionsBySurveyId[currentSurveyId] || [];
+    }
+);
+
+export const { 
+    setAnswers, 
+    setSurveyId, 
+    setSurvey, 
+    markSurveyAsSubmitted,
+    resetSubmissionState, 
+    setEditingSurveyId, 
+    toggleSurveySubmit,
+    updateNewSurveyTitle, 
+    updateNewSurveyDescription, 
+    addNewSurveyQuestion, 
+    updateNewSurveyQuestion, 
+    removeNewSurveyQuestion,
+    addOptionToNewSurveyQuestion, 
+    updateOptionInNewSurveyQuestion, 
+    removeOptionFromNewSurveyQuestion,
+} = surveySlice.actions;
 
 export default surveySlice.reducer;

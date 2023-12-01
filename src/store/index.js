@@ -21,3 +21,5 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
+persistor.purge(); // Use this to purge the persisted state (for testing)

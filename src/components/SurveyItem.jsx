@@ -8,12 +8,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 // Redux Actions
-import { deleteSurvey, setEditingSurveyId, refreshSurvey, toggleSurveySubmit } from '../store/slices/surveySlice';
+import { deleteSurvey, 
+    setEditingSurveyId, 
+    refreshSurvey, 
+    markSurveyAsUnsubmitted,
+    fetchSurveyById
+} from '../store/slices/surveySlice';
 
 // Custom Components
 import AdminSurveyActions from './AdminSurveyActions';
 import Title from './layout/Title';
 import NotificationToast from './layout/NotificationToast';
+
+// Custom Hooks
+import useErrorAlert from '../hooks/useErrorAlert';
 
 const SurveyItem = ({ survey, pageType, userRoles }) => {
     const dispatch = useDispatch();
@@ -22,6 +30,8 @@ const SurveyItem = ({ survey, pageType, userRoles }) => {
     const isAdmin = userRoles.includes('ADMIN');
     const isSubmitted = submittedSurveys[survey.id];
     const { showToast } = NotificationToast();
+    const showTakeSurveyButton = pageType !== 'edit' && pageType !== 'delete' && pageType !== 'refresh' && !isSubmitted;
+    const errorAlert = useErrorAlert();
 
     const handleDelete = async (surveyId) => {
         await dispatch(deleteSurvey(surveyId));
@@ -34,30 +44,42 @@ const SurveyItem = ({ survey, pageType, userRoles }) => {
 
     const handleRefresh = async (surveyId) => {
         try {
-            await dispatch(refreshSurvey(surveyId)).unwrap();
-            showToast({
-                title: 'Survey refreshed',
-                description: 'The survey has been successfully refreshed.',
-                status: 'success'
-            });
-            // diable the refresh button
-
-            dispatch(toggleSurveySubmit(surveyId));
+            const response = await dispatch(refreshSurvey(surveyId)).unwrap();
+    
+            if (response && response.id === surveyId) {
+                dispatch(markSurveyAsUnsubmitted(surveyId));
+                dispatch(fetchSurveyById(surveyId));
+                showToast({
+                    title: 'Survey refreshed',
+                    description: 'The survey has been successfully refreshed.',
+                    status: 'success'
+                });
+            }
         } catch (error) {
             // Error handling is done by useErrorAlert hook
         }
-    }
-
+    };
+    
     return (
+
         <Box p={5} w='100%' maxW='75%' minWidth='300px' shadow='md' borderWidth='1px'>
+            {errorAlert}
             <Title title={survey.title} />
             <Text>{survey.description}</Text>
-            {isAdmin && <AdminSurveyActions surveyId={survey.id} pageType={pageType} onEdit={handleEdit} onDelete={handleDelete} onRefresh={handleRefresh} />}
-            {!isSubmitted ? (
+            {isAdmin && 
+                <AdminSurveyActions 
+                    surveyId={survey.id} 
+                    pageType={pageType} 
+                    onEdit={handleEdit} 
+                    onDelete={handleDelete} 
+                    onRefresh={handleRefresh} 
+                    isSubmitted={isSubmitted}/>}
+            {showTakeSurveyButton && (
                 <Link to={`/surveys/${survey.id}`}>
                     <Button mt={3}>Take Survey</Button>
                 </Link>
-            ) : <Text mt={3}>Survey Submitted. Thank you!</Text>}
+            )}
+            {isSubmitted && <Text mt={3}>Survey Submitted. Thank you!</Text>}
         </Box>
     );
 };

@@ -24,7 +24,6 @@ import { setAnswers } from '../store/slices/surveySlice';
 const QuestionTypeRenderer = ({ questionId, options, type }) => {
     const dispatch = useDispatch();
 
-    // TODO: Add state for selected options and slider value RTK
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [sliderValue, setSliderValue] = useState(5);
     const [showTooltip, setShowTooltip] = useState(false);
@@ -53,7 +52,7 @@ const QuestionTypeRenderer = ({ questionId, options, type }) => {
             );
         case 'single-select':
             return (
-                <RadioGroup onChange={(e) => handleChange(e.target.value)}>
+                <RadioGroup onChange={handleChange}>
                     <Stack direction='column'>
                         {options.map((option, index) => (
                             <Radio key={index} value={option}>{option}</Radio>

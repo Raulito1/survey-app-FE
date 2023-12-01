@@ -1,17 +1,18 @@
-// Redux Hooks
-import { useSelector } from 'react-redux';
-
 // Custom Components
 import SurveyQuestion from './SurveyQuestion';
 
-const SurveyQuestionsList = () => {
-    const questions = useSelector(state => state.survey.questions);
+// Redux Hooks
+import { useSelector } from 'react-redux';
 
+// Redux Actions
+const SurveyQuestionsList = ({ surveyId }) => {
+    const questions = useSelector(state => state.survey.questionsBySurveyId[surveyId] || []);
+    
     return (
         <div>
-            {questions.slice(0, 10).map(question => (
+            {questions.slice(0, 10).map((question, index)=> (
                 <SurveyQuestion
-                    key={question.id}
+                    key={index}
                     survey={question}
                 />
             ))}

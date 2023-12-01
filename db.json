@@ -21,7 +21,7 @@
         {
           "id": 1,
           "type": "multiple-choice",
-          "content": "How satisfied are you with our service?",
+          "question": "How satisfied are you with our service?",
           "options": [
             "Very Satisfied",
             "Satisfied",
@@ -33,17 +33,17 @@
         {
           "id": 2,
           "type": "slider",
-          "content": "On a scale of 1 to 10, how would you rate our product quality?"
+          "question": "On a scale of 1 to 10, how would you rate our product quality?"
         },
         {
           "id": 3,
           "type": "text",
-          "content": "What feature would you like to see in our product?"
+          "question": "What feature would you like to see in our product?"
         },
         {
           "id": 4,
           "type": "multi-select",
-          "content": "Which of the following channels do you use to contact us? (Select all that apply)",
+          "question": "Which of the following channels do you use to contact us? (Select all that apply)",
           "options": [
             "Email",
             "Phone",
@@ -54,7 +54,7 @@
         {
           "id": 5,
           "type": "multiple-choice",
-          "content": "How easy is it to navigate our website?",
+          "question": "How easy is it to navigate our website?",
           "options": [
             "Very Easy",
             "Easy",
@@ -66,7 +66,7 @@
         {
           "id": 6,
           "type": "multiple-choice",
-          "content": "How accessible is our webiste?",
+          "question": "How accessible is our webiste?",
           "options": [
             "Very Accessible",
             "Moderate",
@@ -77,17 +77,17 @@
         {
           "id": 7,
           "type": "text",
-          "content": "What would change about our website?"
+          "question": "What would change about our website?"
         },
         {
           "id": 8,
           "type": "slider",
-          "content": "On a scale of 1 to 10, how would you rate our website"
+          "question": "On a scale of 1 to 10, how would you rate our website"
         },
         {
           "id": 9,
           "type": "multi-select",
-          "content": "Which of the following Social Medias do you use to contact us? (Select all that apply)",
+          "question": "Which of the following Social Medias do you use to contact us? (Select all that apply)",
           "options": [
             "X",
             "Meta",
@@ -98,7 +98,7 @@
         {
           "id": 10,
           "type": "multiple-choice",
-          "content": "How satisfied are you with our survey?",
+          "question": "How satisfied are you with our survey?",
           "options": [
             "Very Satisfied",
             "Satisfied",
@@ -116,7 +116,7 @@
         {
           "id": 1,
           "type": "multiple-choice",
-          "content": "How satisfied are you with our service?",
+          "question": "How satisfied are you with our service?",
           "options": [
             "Very Satisfied",
             "Satisfied",
@@ -128,17 +128,17 @@
         {
           "id": 2,
           "type": "slider",
-          "content": "On a scale of 1 to 10, how would you rate our service quality?"
+          "question": "On a scale of 1 to 10, how would you rate our service quality?"
         },
         {
           "id": 3,
           "type": "text",
-          "content": "What feature would you like to see in our product?"
+          "question": "What feature would you like to see in our product?"
         },
         {
           "id": 4,
           "type": "multi-select",
-          "content": "Which of the following channels do you use to contact us? (Select all that apply)",
+          "question": "Which of the following channels do you use to contact us? (Select all that apply)",
           "options": [
             "Email",
             "Phone",
@@ -149,7 +149,7 @@
         {
           "id": 5,
           "type": "multiple-choice",
-          "content": "How easy is it to navigate our website?",
+          "question": "How easy is it to navigate our website?",
           "options": [
             "Very Easy",
             "Easy",
@@ -161,7 +161,7 @@
         {
           "id": 6,
           "type": "multiple-choice",
-          "content": "How accessible is our webiste?",
+          "question": "How accessible is our webiste?",
           "options": [
             "Very Accessible",
             "Moderate",
@@ -172,17 +172,17 @@
         {
           "id": 7,
           "type": "text",
-          "content": "What would change about our website?"
+          "question": "What would change about our website?"
         },
         {
           "id": 8,
           "type": "slider",
-          "content": "On a scale of 1 to 10, how would you rate our website"
+          "question": "On a scale of 1 to 10, how would you rate our website"
         },
         {
           "id": 9,
           "type": "multi-select",
-          "content": "Which of the following Social Medias do you use to contact us? (Select all that apply)",
+          "question": "Which of the following Social Medias do you use to contact us? (Select all that apply)",
           "options": [
             "X",
             "Meta",
@@ -193,7 +193,7 @@
         {
           "id": 10,
           "type": "multiple-choice",
-          "content": "How satisfied are you with our survey?",
+          "question": "How satisfied are you with our survey?",
           "options": [
             "Very Satisfied",
             "Satisfied",

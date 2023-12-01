@@ -16,14 +16,16 @@ import NotificationToast from './layout/NotificationToast';
 import { useSelector, useDispatch } from 'react-redux';
 
 // Redux Actions
-import { setSurvey, resetSubmissionState } from '../store/slices/surveySlice';
+import { setSurvey, resetSubmissionState, selectSurveyById } from '../store/slices/surveySlice';
 
 const SurveyDetail = () => {
     const { surveyId } = useParams();
     const dispatch = useDispatch();
-    const survey = useSelector(state => state.survey.survey);
-    const surveyQuestions = useSelector(state => state.survey.questions);
+    const survey = useSelector((state) => selectSurveyById(state, surveyId));
+    
     const { showToast } = NotificationToast();
+
+    console.log('Survey Detail', survey);
 
     useEffect(() => {
         dispatch(resetSubmissionState());
@@ -31,6 +33,7 @@ const SurveyDetail = () => {
         const fetchSurvey = async () => {
             try {
                 const data = await surveyService.fetchSurveyById(surveyId);
+                console.log('Survey Detail', data);
                 dispatch(setSurvey(data));
             } catch (error) {
                 console.error('Error fetching survey: detail', error);
@@ -42,18 +45,16 @@ const SurveyDetail = () => {
             }
         };
         fetchSurvey();
-    }, [surveyId, dispatch]);
+    }, [surveyId, dispatch, showToast]);
 
     if (!survey) {
         return <div><CenteredSpinner /></div>;
     }
 
-    console.log('Survey Detail: ', surveyQuestions);
-
     return (
         <div>
             <Title title={survey.title} />
-            <SurveyForm questions={surveyQuestions}/>
+            <SurveyForm />
         </div>
     );
 };

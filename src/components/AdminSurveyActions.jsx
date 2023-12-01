@@ -1,7 +1,7 @@
 // Chakra UI Components
 import { Button } from '@chakra-ui/react';
 
-const AdminSurveyActions = ({ surveyId, pageType, onEdit, onDelete, onRefresh }) => {
+const AdminSurveyActions = ({ surveyId, pageType, onEdit, onDelete, onRefresh, isSubmitted }) => {
     return (
         <>
             {pageType === 'delete' && (
@@ -11,7 +11,11 @@ const AdminSurveyActions = ({ surveyId, pageType, onEdit, onDelete, onRefresh })
                 <Button colorScheme='blue' mt={3} onClick={() => onEdit(surveyId)}>Edit Survey</Button>
             )}
             {pageType === 'refresh' && (
-                <Button colorScheme='blue' mt={3} onClick={() => onRefresh(surveyId)}>Refresh Survey</Button>
+                <Button 
+                    colorScheme='blue' 
+                    mt={3} 
+                    onClick={() => onRefresh(surveyId)}
+                    isDisabled={!isSubmitted}>Refresh Survey</Button>
             )}
         </>
     );

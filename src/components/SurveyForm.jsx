@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Chakra UI Components
 import { Button, Flex } from '@chakra-ui/react';
@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 // Redux Actions
-import { submitSurveyResponses } from '../store/slices/surveySlice';
+import { storeResponse, markSurveyAsSubmitted } from '../store/slices/surveySlice';
 
 // Custom Components
 import CenteredSpinner from './layout/CenteredSpinner';
@@ -18,40 +18,58 @@ import NotificationToast from './layout/NotificationToast';
 import ErrorBoundary from './ErrorBoundary';
 import SurveyQuestionsList from './SurveyQuestionsList';
 
+// Custom Hooks
+import useErrorAlert from '../hooks/useErrorAlert';
+
 const SurveyForm = () => {
     const dispatch = useDispatch();
-    const survey = useSelector(state => state.survey);
-    const { loading, error, submissionSuccess } = survey;
+    const currentSurvey = useSelector(state => state.survey.currentSurvey);
+    const userId = useSelector(state => state.auth.userId); // Make sure this is the correct path to user ID
+    const { loading, error, submissionSuccess } = useSelector(state => state.survey);
     const navigate = useNavigate();
     const { showToast } = NotificationToast();
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        console.log('Survey Form submit: ', survey);
-        // submitSurveyResponses(dispatch, survey);
-    };
 
-    useEffect(() => {
-        if (submissionSuccess) {
+        const responsePromises = Object.entries(currentSurvey.answers || {}).map(([questionId, answer]) =>
+            dispatch(storeResponse({
+                userId: userId,
+                surveyId: currentSurvey.id,
+                response: { questionId: parseInt(questionId), answer }
+            })).unwrap()
+        );
+
+        try {
+            await Promise.all(responsePromises);
+            dispatch(markSurveyAsSubmitted(currentSurvey.id));
             showToast({
                 title: 'Success',
                 description: 'Survey submitted successfully!',
                 status: 'success'
             });
-
+            setIsSubmitted(true);
             setTimeout(() => navigate('/'), 3000);
-        }
-    }, [submissionSuccess, navigate, showToast]);
-
-    useEffect(() => {
-        if (error) {
+        } catch (error) {
+            console.error('An error occurred while submitting the survey:', error);
             showToast({
-                title: 'Failed to submit survey!',
-                description: error,
+                title: 'Error',
+                description: 'Failed to submit survey.',
                 status: 'error'
             });
         }
-    }, [error, showToast]);
+    };    
+
+    useEffect(() => {
+        if (submissionSuccess && isSubmitted) {
+            setTimeout(() => navigate('/'), 1000);
+        }
+    }, [submissionSuccess, navigate, isSubmitted]);
+
+    if (!currentSurvey) {
+        return <CenteredSpinner />;
+    }
 
     return (
         <form onSubmit={handleSubmit} style={{ paddingTop: '20px' }}>
@@ -60,9 +78,8 @@ const SurveyForm = () => {
                 {!loading && !error && (
                     <ErrorBoundary>
                         <SurveyQuestionsList 
-                            key={survey.surveyId}
-                            questions={survey.questions} 
-                            answers={survey.answers} 
+                            key={currentSurvey.id}
+                            surveyId={currentSurvey.id}
                         />
                     </ErrorBoundary>
                 )}

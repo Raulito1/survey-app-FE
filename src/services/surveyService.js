@@ -98,6 +98,8 @@ const fetchSurveyById = async (surveyId) => {
         const response = await fetch(`${BASE_URL}/surveys/${surveyId}`);
         const data = await response.json();
 
+        console.log('Survey data received:', data);
+
         return data;
     } catch (error) {
         if (error) {
@@ -110,26 +112,43 @@ const fetchSurveyById = async (surveyId) => {
 
 export const refreshSurvey = async (surveyId) => {
     try {
-        // Simulate a refresh by updating the survey's lastRefreshed timestamp
-        const surveyData = {
-            lastRefreshed: new Date().toISOString(),
-        };
-        
-        const response = await fetch(`${BASE_URL}/surveys/${surveyId}`, {
+        const response = await fetch(`${BASE_URL}/surveys/${surveyId}`);
+        const surveyData = await response.json();
+
+        surveyData.lastRefreshed = new Date().toISOString();
+
+        const refreshResponse = await fetch(`${BASE_URL}/surveys/${surveyId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(surveyData),
         });
 
-        return await response.json();
+        return await refreshResponse.json();
     } catch (error) {
-        if (error) {
-            throw new Error(`Failed to refresh survey ${surveyId} at the moment, please check back later`);
-        } else {
-            throw error;
-        }
+        console.error('Failed to refresh survey:', error);
+        throw new Error(`Failed to refresh survey ${surveyId} at the moment, please check back later`);
     }
 };
+
+export const updateSurvey = async (surveyData) => {
+    const { id, ...data } = surveyData;
+    try {
+        const response = await fetch(`${BASE_URL}/surveys/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data) 
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok.');
+        }
+        const updatedData = await response.json();
+        return updatedData;
+    } catch (error) {
+        console.error('Failed to update survey:', error);
+        throw new Error(`Failed to update survey ${id} at this time, please check back later`);
+    }
+};
+
 
 export const surveyService = {
     storeResponse,
@@ -138,5 +157,6 @@ export const surveyService = {
     createSurvey,
     deleteSurvey,
     fetchAllSurveys,
-    refreshSurvey
+    refreshSurvey,
+    updateSurvey
 };
